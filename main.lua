@@ -1,5 +1,5 @@
 -- Настройки
-local menuTitle = "CXNT"
+local menuTitle = "CXNT SCRIPT V1.1"
 local toggleKey = Enum.KeyCode.Insert
 local defaultWalkSpeed = 16
 local autoShowMenu = true
@@ -18,9 +18,9 @@ loadingGui.Name = "LoadingIndicator"
 loadingGui.Parent = game:GetService("CoreGui")
 
 local loadingText = Instance.new("TextLabel")
-loadingText.Text = "Идет загрузка скрипта CXNT..."
+loadingText.Text = "Идет загрузка ебейшего скрипта CXNT..."
 loadingText.Size = UDim2.new(0, 200, 0, 30)
-loadingText.Position = UDim2.new(0, 10, 0, 10)
+loadingText.Position = UDim2.new(0, 30, 0, 30)
 loadingText.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 loadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
 loadingText.Font = Enum.Font.GothamBold
@@ -35,12 +35,20 @@ gui.Name = "CXNT_Menu"
 gui.Parent = game:GetService("CoreGui")
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 600, 0, 600) -- Increased width
-frame.Position = UDim2.new(0.5, -300, 0.5, -300) -- Adjusted position
+frame.Size = UDim2.new(0, 600, 0, 600)
+frame.Position = UDim2.new(0.5, -300, 0.5, -300)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.BorderSizePixel = 0
 frame.Visible = false
 frame.Parent = gui
+
+-- Add red accent bar at top
+local accentBar = Instance.new("Frame")
+accentBar.Size = UDim2.new(1, 0, 0, 3)
+accentBar.Position = UDim2.new(0, 0, 0, 0)
+accentBar.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+accentBar.BorderSizePixel = 0
+accentBar.Parent = frame
 
 -- Добавляем тень
 local shadow = Instance.new("ImageLabel")
@@ -73,7 +81,7 @@ end)
 
 -- Watermark with time
 local watermark = Instance.new("TextLabel")
-watermark.Text = "CXNT V1"
+watermark.Text = "CXNT SCRIPT V1"
 watermark.Size = UDim2.new(0, 250, 0, 30)
 watermark.Position = UDim2.new(0, 10, 0, 0)
 watermark.BackgroundTransparency = 1
@@ -105,7 +113,7 @@ spawn(function()
     while wait(1) do
         local time = os.date("!*t")
         local hours = (time.hour + 3) % 24
-        mskTime.Text = string.format("МСК %02d:%02d:%02d", hours, time.min, time.sec)
+        mskTime.Text = string.format("%02d:%02d:%02d", hours, time.min, time.sec)
     end
 end)
 
@@ -390,10 +398,12 @@ skyButton.Font = Enum.Font.Gotham
 skyButton.TextSize = 14
 skyButton.Parent = frame
 
+
+
 local speedLabel = Instance.new("TextLabel")
 speedLabel.Text = "SPEED PLAYER: " .. defaultWalkSpeed
 speedLabel.Size = UDim2.new(1, -20, 0, 20)
-speedLabel.Position = UDim2.new(0, 10, 0, 500)
+speedLabel.Position = UDim2.new(0, 10, 0, 520)
 speedLabel.BackgroundTransparency = 1
 speedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 speedLabel.Font = Enum.Font.Gotham
@@ -440,7 +450,21 @@ local function createItemEsp(item)
     highlight.ZIndex = 10
     highlight.Size = item.Size + Vector3.new(0.1, 0.1, 0.1)
     highlight.Transparency = 0.7
-    highlight.Color3 = Color3.new(0, 1, 0) -- Зеленый цвет для предметов
+
+    -- Определяем цвет в зависимости от типа предмета
+    local itemName = item.Name:lower()
+    if itemName:find("weapon") or itemName:find("gun") or itemName:find("sword") or itemName:find("knife") then
+        highlight.Color3 = Color3.new(1, 0, 0) -- Красный для оружия
+    elseif itemName:find("ammo") then
+        highlight.Color3 = Color3.new(1, 1, 0) -- Желтый для патронов
+    elseif itemName:find("heal") or itemName:find("med") or itemName:find("bandage") then
+        highlight.Color3 = Color3.new(0, 1, 0) -- Зеленый для медикаментов
+    elseif itemName:find("bond") then
+        highlight.Color3 = Color3.new(0, 0, 1) -- Синий для бондов
+    else
+        highlight.Color3 = Color3.new(1, 1, 1) -- Белый для остальных предметов
+    end
+
     highlight.Parent = game.CoreGui
 
     -- Добавляем название предмета
@@ -495,8 +519,18 @@ local function toggleItemEsp()
                 item.Name:lower():find("pickup") or 
                 item.Name:lower():find("tool") or
                 item.Name:lower():find("weapon") or
+                item.Name:lower():find("gun") or
+                item.Name:lower():find("sword") or
+                item.Name:lower():find("knife") or
                 item.Name:lower():find("ammo") or
-                item.Name:lower():find("heal")) then
+                item.Name:lower():find("mag") or
+                item.Name:lower():find("heal") or
+                item.Name:lower():find("med") or
+                item.Name:lower():find("bandage") or
+                item.Name:lower():find("bond") or
+                item.Name:lower():find("money") or
+                item.Name:lower():find("loot") or
+                item.Name:lower():find("collect")) then
                 createItemEsp(item)
             end
         end
@@ -546,14 +580,23 @@ local function updateEspColor()
     end
 end
 
-local function createEsp(player)
-    if player == game.Players.LocalPlayer then return end
+local function createEsp(target, isPlayer)
+    if isPlayer and target == game.Players.LocalPlayer then return end
+    
+    local function setupEsp(character)
+        if not character then return end
+        local parts = {}
+        
+        -- Red for mobs/NPCs, white for players
+        local espColorToUse = isPlayer and Color3.new(1, 1, 1) or Color3.new(1, 0, 0)
 
-    local character = player.Character or player.CharacterAdded:Wait()
-    local parts = {}
+        -- Remove old ESP if exists
+        if espObjects[target] then
+            removeEsp(target)
+        end
 
-    -- Create name label at the top
-    local nameLabel = Instance.new("BillboardGui")
+        -- Create name label at the top
+        local nameLabel = Instance.new("BillboardGui")
     nameLabel.Name = "CXNT_NameLabel"
     nameLabel.Size = UDim2.new(0, 200, 0, 50)
     nameLabel.StudsOffset = Vector3.new(0, 3, 0)
@@ -566,7 +609,7 @@ local function createEsp(player)
     nameText.TextColor3 = Color3.new(1, 1, 1)
     nameText.TextStrokeTransparency = 0
     nameText.TextStrokeColor3 = Color3.new(0, 0, 0)
-    nameText.Text = player.Name
+    nameText.Text = target.Name
     nameText.Font = Enum.Font.GothamBold
     nameText.TextSize = 14
     nameText.Parent = nameLabel
@@ -601,7 +644,15 @@ local function createEsp(player)
         end
     end)
 
-    espObjects[player] = parts
+    espObjects[target] = parts
+    end
+    
+    if isPlayer then
+        setupEsp(target.Character)
+        target.CharacterAdded:Connect(setupEsp)
+    else
+        setupEsp(target)
+    end
 end
 
 local function removeEsp(player)
@@ -631,11 +682,43 @@ local function toggleEsp()
     espButton.Text = "ESP: " .. (espEnabled and "ON" or "OFF")
 
     if espEnabled then
+        -- ESP for players
         for _, player in ipairs(game.Players:GetPlayers()) do
-            if player ~= game.Players.LocalPlayer and player.Character then
-                createEsp(player)
+            if player ~= game.Players.LocalPlayer then
+                createEsp(player, true)
             end
         end
+
+        -- Add ESP for new players joining
+        game.Players.PlayerAdded:Connect(function(newPlayer)
+            if espEnabled and newPlayer ~= game.Players.LocalPlayer then
+                createEsp(newPlayer, true)
+            end
+        end)
+
+        -- Remove ESP when players leave
+        game.Players.PlayerRemoving:Connect(function(leavingPlayer)
+            if espObjects[leavingPlayer] then
+                removeEsp(leavingPlayer)
+            end
+        end)
+        
+        -- ESP for mobs/NPCs
+        for _, mob in ipairs(workspace:GetDescendants()) do
+            if mob:IsA("Model") and mob:FindFirstChild("Humanoid") and 
+               not game.Players:GetPlayerFromCharacter(mob) then
+                createEsp(mob, false)
+            end
+        end
+        
+        -- Watch for new mobs
+        workspace.DescendantAdded:Connect(function(descendant)
+            if espEnabled and descendant:IsA("Model") and 
+               descendant:FindFirstChild("Humanoid") and
+               not game.Players:GetPlayerFromCharacter(descendant) then
+                createEsp(descendant, false)
+            end
+        end)
 
         game.Players.PlayerAdded:Connect(function(player)
             player.CharacterAdded:Connect(function()
@@ -756,33 +839,47 @@ end
 -- Инициализируем оптимизацию телепортации
 optimizeTeleport()
 
+
+
 local function onSliderDrag()
     local isDragging = false
-    local lastUpdate = 0
-    local updateDelay = 0.016 -- ~60fps
+    local UserInputService = game:GetService("UserInputService")
+    local RunService = game:GetService("RunService")
+    local dragConnection
+    local endConnection
 
     sliderButton.MouseButton1Down:Connect(function()
         isDragging = true
-        game:GetService("RunService").RenderStepped:Connect(function()
+        
+        if dragConnection then dragConnection:Disconnect() end
+        if endConnection then endConnection:Disconnect() end
+        
+        dragConnection = RunService.RenderStepped:Connect(function()
             if not isDragging then return end
-
-            local currentTime = tick()
-            if currentTime - lastUpdate < updateDelay then return end
-
-            local mouse = game:GetService("UserInputService"):GetMouseLocation()
-            local sliderPos = slider.AbsolutePosition.X
-            local sliderSize = slider.AbsoluteSize.X
-            local relativeX = (mouse.X - sliderPos) / sliderSize            local newValue = math.clamp(relativeX * 1000, 1, 1000)
+            
+            local mousePos = UserInputService:GetMouseLocation()
+            local sliderStart = slider.AbsolutePosition.X
+            local sliderWidth = slider.AbsoluteSize.X
+            local relativeX = math.clamp((mousePos.X - sliderStart) / sliderWidth, 0, 1)
+            local newValue = math.floor(relativeX * 1000)
+            
+            if newValue < 1 then newValue = 1 end
+            if newValue > 1000 then newValue = 1000 end
+            
             updateSpeed(newValue)
-
-            lastUpdate = currentTime
         end)
-    end)
-
-    game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            isDragging = false
-        end
+        
+        endConnection = UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                isDragging = false
+                if dragConnection then
+                    dragConnection:Disconnect()
+                end
+                if endConnection then
+                    endConnection:Disconnect()
+                end
+            end
+        end)
     end)
 end
 
@@ -1031,6 +1128,7 @@ local function initialize()
 
     game:GetService("UserInputService").InputBegan:Connect(onInput)
     sliderButton.MouseButton1Down:Connect(onSliderDrag)
+    
     espButton.MouseButton1Click:Connect(toggleEsp)
     itemEspButton.MouseButton1Click:Connect(function()
         local isEnabled = toggleItemEsp()
@@ -1196,16 +1294,16 @@ local function initialize()
     aimbotButton.TextSize = 14
     aimbotButton.Parent = frame
 
-    -- Silent Aim Button
-    local silentAimButton = Instance.new("TextButton")
-    silentAimButton.Text = "SILENT AIM: OFF"
-    silentAimButton.Size = UDim2.new(0.4, -10, 0, 20)
-    silentAimButton.Position = UDim2.new(0.6, 0, 0, 120)
-    silentAimButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    silentAimButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    silentAimButton.Font = Enum.Font.Gotham
-    silentAimButton.TextSize = 14
-    silentAimButton.Parent = frame
+    -- Mob Aimbot Button
+    local mobAimbotButton = Instance.new("TextButton")
+    mobAimbotButton.Text = "MOB AIMBOT: OFF"
+    mobAimbotButton.Size = UDim2.new(0.4, -10, 0, 20)
+    mobAimbotButton.Position = UDim2.new(0.6, 0, 0, 120)
+    mobAimbotButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    mobAimbotButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    mobAimbotButton.Font = Enum.Font.Gotham
+    mobAimbotButton.TextSize = 14
+    mobAimbotButton.Parent = frame
 
     -- Auto Collect Button
     local autoCollectButton = Instance.new("TextButton")
@@ -1330,47 +1428,46 @@ local function initialize()
         end
     end)
 
-    -- Silent Aim functionality
-    local silentAimEnabled = false
-    local silentAimConnection
+    -- Mob Aimbot functionality
+    local mobAimbotEnabled = false
+    local mobAimbotConnection
     
-    silentAimButton.MouseButton1Click:Connect(function()
-        silentAimEnabled = not silentAimEnabled
-        silentAimButton.Text = "SILENT AIM: " .. (silentAimEnabled and "ON" or "OFF")
+    mobAimbotButton.MouseButton1Click:Connect(function()
+        mobAimbotEnabled = not mobAimbotEnabled
+        mobAimbotButton.Text = "MOB AIMBOT: " .. (mobAimbotEnabled and "ON" or "OFF")
 
-        if silentAimEnabled then
-            silentAimConnection = game:GetService("RunService").RenderStepped:Connect(function()
+        if mobAimbotEnabled then
+            mobAimbotConnection = game:GetService("RunService").RenderStepped:Connect(function()
                 local nearestDistance = math.huge
-                local nearestPlayer = nil
+                local nearestMob = nil
                 local myCharacter = player.Character
                 if not myCharacter or not myCharacter:FindFirstChild("HumanoidRootPart") then return end
 
-                for _, otherPlayer in pairs(game.Players:GetPlayers()) do
-                    if otherPlayer ~= player and otherPlayer.Character and 
-                       otherPlayer.Character:FindFirstChild("HumanoidRootPart") and
-                       otherPlayer.Character:FindFirstChild("Humanoid") and
-                       otherPlayer.Character.Humanoid.Health > 0 then
+                for _, mob in ipairs(workspace:GetDescendants()) do
+                    if mob:IsA("Model") and mob:FindFirstChild("Humanoid") and 
+                       mob:FindFirstChild("HumanoidRootPart") and
+                       not game.Players:GetPlayerFromCharacter(mob) and
+                       mob.Humanoid.Health > 0 then
                         
-                        local distance = (otherPlayer.Character.HumanoidRootPart.Position - myCharacter.HumanoidRootPart.Position).Magnitude
+                        local distance = (mob.HumanoidRootPart.Position - myCharacter.HumanoidRootPart.Position).Magnitude
                         if distance < nearestDistance then
                             nearestDistance = distance
-                            nearestPlayer = otherPlayer
+                            nearestMob = mob
                         end
                     end
                 end
 
-                if nearestPlayer and nearestPlayer.Character then
-                    local head = nearestPlayer.Character:FindFirstChild("Head")
+                if nearestMob then
+                    local head = nearestMob:FindFirstChild("Head")
                     if head then
-                        targetPlayer = nearestPlayer
+                        workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, head.Position)
                     end
                 end
             end)
         else
-            if silentAimConnection then
-                silentAimConnection:Disconnect()
+            if mobAimbotConnection then
+                mobAimbotConnection:Disconnect()
             end
-            targetPlayer = nil
         end
     end)
 
@@ -1388,13 +1485,26 @@ local function initialize()
                 if not character or not character:FindFirstChild("HumanoidRootPart") then return end
 
                 local rootPart = character.HumanoidRootPart
-                local collectRadius = 50 -- Радиус сбора предметов
+                local collectRadius = 250 -- Увеличенный радиус сбора предметов
 
                 for _, item in pairs(workspace:GetDescendants()) do
                     if item:IsA("BasePart") and 
                        (item.Name:lower():find("item") or 
                         item.Name:lower():find("pickup") or 
-                        item.Name:lower():find("collect")) then
+                        item.Name:lower():find("collect") or
+                        item.Name:lower():find("coin") or
+                        item.Name:lower():find("gem") or
+                        item.Name:lower():find("resource") or
+                        item.Name:lower():find("drop") or
+                        item.Name:lower():find("weapon") or
+                        item.Name:lower():find("gun") or
+                        item.Name:lower():find("ammo") or
+                        item.Name:lower():find("bond") or
+                        item.Name:lower():find("bandage") or
+                        item.Name:lower():find("knife") or
+                        item.Name:lower():find("sword") or
+                        item.Name:lower():find("med") or
+                        item.Name:lower():find("heal")) then
                         
                         local distance = (item.Position - rootPart.Position).Magnitude
                         if distance <= collectRadius then
