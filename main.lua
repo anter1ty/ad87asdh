@@ -1,5 +1,5 @@
 -- Настройки
-local menuTitle = "CXNT SCRIPT V1.1"
+local menuTitle = "CXNT"
 local toggleKey = Enum.KeyCode.Insert
 local defaultWalkSpeed = 16
 local autoShowMenu = true
@@ -18,9 +18,9 @@ loadingGui.Name = "LoadingIndicator"
 loadingGui.Parent = game:GetService("CoreGui")
 
 local loadingText = Instance.new("TextLabel")
-loadingText.Text = "Идет загрузка ебейшего скрипта CXNT..."
+loadingText.Text = "Идет загрузка скрипта CXNT..."
 loadingText.Size = UDim2.new(0, 200, 0, 30)
-loadingText.Position = UDim2.new(0, 30, 0, 30)
+loadingText.Position = UDim2.new(0, 10, 0, 10)
 loadingText.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 loadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
 loadingText.Font = Enum.Font.GothamBold
@@ -81,7 +81,7 @@ end)
 
 -- Watermark with time
 local watermark = Instance.new("TextLabel")
-watermark.Text = "CXNT SCRIPT V1"
+watermark.Text = "CXNT V1"
 watermark.Size = UDim2.new(0, 250, 0, 30)
 watermark.Position = UDim2.new(0, 10, 0, 0)
 watermark.BackgroundTransparency = 1
@@ -113,7 +113,7 @@ spawn(function()
     while wait(1) do
         local time = os.date("!*t")
         local hours = (time.hour + 3) % 24
-        mskTime.Text = string.format("  %02d:%02d:%02d", hours, time.min, time.sec)
+        mskTime.Text = string.format("МСК %02d:%02d:%02d", hours, time.min, time.sec)
     end
 end)
 
@@ -582,11 +582,11 @@ end
 
 local function createEsp(target, isPlayer)
     if isPlayer and target == game.Players.LocalPlayer then return end
-    
+
     local function setupEsp(character)
         if not character then return end
         local parts = {}
-        
+
         -- Red for mobs/NPCs, white for players
         local espColorToUse = isPlayer and Color3.new(1, 1, 1) or Color3.new(1, 0, 0)
 
@@ -646,7 +646,7 @@ local function createEsp(target, isPlayer)
 
     espObjects[target] = parts
     end
-    
+
     if isPlayer then
         setupEsp(target.Character)
         target.CharacterAdded:Connect(setupEsp)
@@ -702,7 +702,7 @@ local function toggleEsp()
                 removeEsp(leavingPlayer)
             end
         end)
-        
+
         -- ESP for mobs/NPCs
         for _, mob in ipairs(workspace:GetDescendants()) do
             if mob:IsA("Model") and mob:FindFirstChild("Humanoid") and 
@@ -710,7 +710,7 @@ local function toggleEsp()
                 createEsp(mob, false)
             end
         end
-        
+
         -- Watch for new mobs
         workspace.DescendantAdded:Connect(function(descendant)
             if espEnabled and descendant:IsA("Model") and 
@@ -818,7 +818,7 @@ end
 local function optimizeTeleport()
     local teleportService = game:GetService("TeleportService")
     local replicatedStorage = game:GetService("ReplicatedStorage")
-    
+
     -- Предварительная загрузка следующего места
     teleportService.LocalPlayerArrivedFromTeleport:Connect(function(loadingPlayer, teleportData)
         if teleportData then
@@ -850,25 +850,25 @@ local function onSliderDrag()
 
     sliderButton.MouseButton1Down:Connect(function()
         isDragging = true
-        
+
         if dragConnection then dragConnection:Disconnect() end
         if endConnection then endConnection:Disconnect() end
-        
+
         dragConnection = RunService.RenderStepped:Connect(function()
             if not isDragging then return end
-            
+
             local mousePos = UserInputService:GetMouseLocation()
             local sliderStart = slider.AbsolutePosition.X
             local sliderWidth = slider.AbsoluteSize.X
             local relativeX = math.clamp((mousePos.X - sliderStart) / sliderWidth, 0, 1)
             local newValue = math.floor(relativeX * 1000)
-            
+
             if newValue < 1 then newValue = 1 end
             if newValue > 1000 then newValue = 1000 end
-            
+
             updateSpeed(newValue)
         end)
-        
+
         endConnection = UserInputService.InputEnded:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 then
                 isDragging = false
@@ -891,12 +891,12 @@ local function toggleGodMode()
     local function applyGodMode(character)
         if not character then return end
         local humanoid = character:WaitForChild("Humanoid")
-        
+
         -- Отключаем старый connection если он существует
         if humanoid.HealthChangedConnection then
             humanoid.HealthChangedConnection:Disconnect()
         end
-        
+
         if godModeEnabled then
             humanoid.MaxHealth = math.huge
             humanoid.Health = math.huge
@@ -1109,7 +1109,7 @@ local function initialize()
             end
         end)
     end)
-    
+
     loadingGui:Destroy()
 
     -- Handle player leaving
@@ -1128,7 +1128,7 @@ local function initialize()
 
     game:GetService("UserInputService").InputBegan:Connect(onInput)
     sliderButton.MouseButton1Down:Connect(onSliderDrag)
-    
+
     espButton.MouseButton1Click:Connect(toggleEsp)
     itemEspButton.MouseButton1Click:Connect(function()
         local isEnabled = toggleItemEsp()
@@ -1137,12 +1137,12 @@ local function initialize()
     spinButton.MouseButton1Click:Connect(toggleSpin)
     godModeButton.MouseButton1Click:Connect(toggleGodMode)
 
-    
+
 
     noclipButton.MouseButton1Click:Connect(toggleNoclip)
 
 
-    
+
 
     -- Click Teleport button
     local teleportButton = Instance.new("TextButton")
@@ -1257,15 +1257,71 @@ local function initialize()
     invisibilityButton.Parent = frame
 
     local isInvisible = false
+    local invisibilityConnection
+    
     invisibilityButton.MouseButton1Click:Connect(function()
         isInvisible = not isInvisible
         invisibilityButton.Text = "INVISIBILITY: " .. (isInvisible and "ON" or "OFF")
 
         local char = player.Character
         if char then
+            -- Обновляем прозрачность
             for _, part in pairs(char:GetDescendants()) do
                 if part:IsA("BasePart") or part:IsA("Decal") then
                     part.Transparency = isInvisible and 1 or 0
+                end
+            end
+
+            -- Управляем обнаружением мобами
+            if isInvisible then
+                invisibilityConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                    local character = player.Character
+                    if not character then return end
+                    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                    if not humanoidRootPart then return end
+
+                    for _, mob in pairs(workspace:GetDescendants()) do
+                        if mob:IsA("Model") and mob:FindFirstChild("Humanoid") and 
+                           not game.Players:GetPlayerFromCharacter(mob) then
+                            
+                            local mobHumanoid = mob:FindFirstChild("Humanoid")
+                            local mobRoot = mob:FindFirstChild("HumanoidRootPart")
+                            
+                            if mobHumanoid and mobRoot then
+                                -- Заставляем моба идти в противоположном направлении
+                                local direction = (mobRoot.Position - humanoidRootPart.Position).Unit
+                                local targetPos = mobRoot.Position + direction * 50
+                                mobHumanoid:MoveTo(targetPos)
+                                
+                                -- Отключаем атаку
+                                mobHumanoid.AutoRotate = false
+                                for _, state in pairs(Enum.HumanoidStateType:GetEnumItems()) do
+                                    if state.Name:match("Attack") then
+                                        mobHumanoid:SetStateEnabled(state, false)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end)
+            else
+                -- Восстанавливаем нормальное поведение мобов
+                if invisibilityConnection then
+                    invisibilityConnection:Disconnect()
+                end
+                
+                for _, mob in pairs(workspace:GetDescendants()) do
+                    if mob:IsA("Model") and mob:FindFirstChild("Humanoid") and 
+                       not game.Players:GetPlayerFromCharacter(mob) then
+                        
+                        local mobHumanoid = mob:FindFirstChild("Humanoid")
+                        if mobHumanoid then
+                            mobHumanoid.AutoRotate = true
+                            for _, state in pairs(Enum.HumanoidStateType:GetEnumItems()) do
+                                mobHumanoid:SetStateEnabled(state, true)
+                            end
+                        end
+                    end
                 end
             end
         end
@@ -1327,18 +1383,111 @@ local function initialize()
     rapidAttackButton.TextSize = 14
     rapidAttackButton.Parent = frame
 
+    -- Auto Shoot Button
+    local autoShootButton = Instance.new("TextButton")
+    autoShootButton.Text = "AUTO SHOOT: OFF"
+    autoShootButton.Size = UDim2.new(0.4, -10, 0, 20)
+    autoShootButton.Position = UDim2.new(0.6, 0, 0, 210)
+    autoShootButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    autoShootButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    autoShootButton.Font = Enum.Font.Gotham
+    autoShootButton.TextSize = 14
+    autoShootButton.Parent = frame
+
+    -- Ammo Hack Button
+    local ammoHackButton = Instance.new("TextButton")
+    ammoHackButton.Text = "INFINITE AMMO: OFF"
+    ammoHackButton.Size = UDim2.new(0.4, -10, 0, 20)
+    ammoHackButton.Position = UDim2.new(0.6, 0, 0, 240)
+    ammoHackButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    ammoHackButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ammoHackButton.Font = Enum.Font.Gotham
+    ammoHackButton.TextSize = 14
+    ammoHackButton.Parent = frame
+
+    local ammoHackEnabled = false
+    local ammoHackConnection
+
+    ammoHackButton.MouseButton1Click:Connect(function()
+        ammoHackEnabled = not ammoHackEnabled
+        ammoHackButton.Text = "INFINITE AMMO: " .. (ammoHackEnabled and "ON" or "OFF")
+
+        if ammoHackEnabled then
+            ammoHackConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                local character = player.Character
+                if not character then return end
+
+                -- Поиск всех оружий в инвентаре
+                for _, tool in pairs(character:GetChildren()) do
+                    if tool:IsA("Tool") then
+                        -- Список всех возможных имен для патронов и магазинов
+                        local ammoNames = {
+                            "Ammo", "PistolAmmo", "RifleAmmo", "ShotgunAmmo", "Bullets", "Magazine",
+                            "ClipSize", "StoredAmmo", "LoadedAmmo", "AmmoCount", "BulletsLeft",
+                            "CurrentAmmo", "MaxAmmo", "AmmoInMag", "AmmoInClip", "TotalAmmo",
+                            "PrimaryAmmo", "SecondaryAmmo", "ReserveAmmo", "MagazineAmmo"
+                        }
+
+                        -- Рекурсивный поиск и изменение всех значений патронов
+                        local function setInfiniteAmmo(obj)
+                            for _, v in pairs(obj:GetDescendants()) do
+                                -- Проверяем имя объекта
+                                for _, ammoName in ipairs(ammoNames) do
+                                    if v.Name:lower():find(ammoName:lower()) then
+                                        if v:IsA("NumberValue") or v:IsA("IntValue") then
+                                            v.Value = math.huge
+                                        elseif v:IsA("Property") then
+                                            v = math.huge
+                                        end
+                                    end
+                                end
+                                
+                                -- Проверяем специальные конфигурации
+                                if v.Name == "Config" or v.Name == "Settings" or v.Name == "GunStats" then
+                                    setInfiniteAmmo(v)
+                                end
+                            end
+                        end
+
+                        -- Применяем к текущему оружию
+                        setInfiniteAmmo(tool)
+                        
+                        -- Перехватываем события изменения патронов
+                        tool.Changed:Connect(function()
+                            if ammoHackEnabled then
+                                setInfiniteAmmo(tool)
+                            end
+                        end)
+                    end
+                end
+            end)
+
+            -- Отслеживаем новое оружие в инвентаре
+            character.ChildAdded:Connect(function(newTool)
+                if ammoHackEnabled and newTool:IsA("Tool") then
+                    wait() -- Ждем загрузки всех свойств
+                    setInfiniteAmmo(newTool)
+                end
+            end)
+        else
+            if ammoHackConnection then
+                ammoHackConnection:Disconnect()
+            end
+        end
+    end)
+
     local rapidAttackEnabled = false
     local rapidAttackConnection
     -- Auto Heal Function
     local autoHealEnabled = false
     local healConnection
-    
+
     local characterAddedConnection
-    
+
     autoHealButton.MouseButton1Click:Connect(function()
         autoHealEnabled = not autoHealEnabled
         autoHealButton.Text = "AUTO HEAL: " .. (autoHealEnabled and "ON" or "OFF")
-        
+
         -- Отключаем старые подключения
         if healConnection then
             healConnection:Disconnect()
@@ -1348,22 +1497,22 @@ local function initialize()
             characterAddedConnection:Disconnect()
             characterAddedConnection = nil
         end
-        
+
         if autoHealEnabled then
             -- Функция для настройки автохила на персонаже
             local function setupAutoHeal(char)
                 if not char then return end
                 local humanoid = char:WaitForChild("Humanoid")
                 if not humanoid then return end
-                
+
                 -- Отключаем старое подключение если оно существует
                 if healConnection then
                     healConnection:Disconnect()
                 end
-                
+
                 humanoid.MaxHealth = 100000
                 humanoid.Health = 100000
-                
+
                 healConnection = humanoid.HealthChanged:Connect(function(health)
                     if autoHealEnabled and health < humanoid.MaxHealth then
                         task.wait() -- Небольшая задержка для стабильности
@@ -1373,12 +1522,12 @@ local function initialize()
                     end
                 end)
             end
-            
+
             -- Устанавливаем автохил на текущем персонаже
             if player.Character then
                 setupAutoHeal(player.Character)
             end
-            
+
             -- Подключаемся к событию появления нового персонажа
             characterAddedConnection = player.CharacterAdded:Connect(setupAutoHeal)
         end
@@ -1401,11 +1550,11 @@ local function initialize()
                 if not myCharacter or not myCharacter:FindFirstChild("HumanoidRootPart") then return end
 
                 for _, otherPlayer in pairs(game.Players:GetPlayers()) do
-                    if otherPlayer ~= player and otherPlayer.Character and 
+                    if otherPlayer ~= player and otherPlayer and otherPlayer.Character and 
                        otherPlayer.Character:FindFirstChild("HumanoidRootPart") and
                        otherPlayer.Character:FindFirstChild("Humanoid") and
                        otherPlayer.Character.Humanoid.Health > 0 then
-                        
+
                         local distance = (otherPlayer.Character.HumanoidRootPart.Position - myCharacter.HumanoidRootPart.Position).Magnitude
                         if distance < nearestDistance then
                             nearestDistance = distance
@@ -1431,7 +1580,7 @@ local function initialize()
     -- Mob Aimbot functionality
     local mobAimbotEnabled = false
     local mobAimbotConnection
-    
+
     mobAimbotButton.MouseButton1Click:Connect(function()
         mobAimbotEnabled = not mobAimbotEnabled
         mobAimbotButton.Text = "MOB AIMBOT: " .. (mobAimbotEnabled and "ON" or "OFF")
@@ -1448,7 +1597,7 @@ local function initialize()
                        mob:FindFirstChild("HumanoidRootPart") and
                        not game.Players:GetPlayerFromCharacter(mob) and
                        mob.Humanoid.Health > 0 then
-                        
+
                         local distance = (mob.HumanoidRootPart.Position - myCharacter.HumanoidRootPart.Position).Magnitude
                         if distance < nearestDistance then
                             nearestDistance = distance
@@ -1505,7 +1654,7 @@ local function initialize()
                         item.Name:lower():find("sword") or
                         item.Name:lower():find("med") or
                         item.Name:lower():find("heal")) then
-                        
+
                         local distance = (item.Position - rootPart.Position).Magnitude
                         if distance <= collectRadius then
                             item.CFrame = rootPart.CFrame
@@ -1553,6 +1702,142 @@ local function initialize()
     player.CharacterAdded:Connect(function(character)
         character:WaitForChild("Humanoid")
         updateSpeed(tonumber(string.match(speedLabel.Text, "%d+")) or defaultWalkSpeed)
+    end)
+
+    -- Auto Shoot functionality
+    local autoShootEnabled = false
+    local autoShootConnection
+
+    -- Wall Bang functionality
+    local wallBangButton = Instance.new("TextButton")
+    wallBangButton.Text = "WALL BANG: OFF"
+    wallBangButton.Size = UDim2.new(0.4, -10, 0, 20)
+    wallBangButton.Position = UDim2.new(0.6, 0, 0, 270)
+    wallBangButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    wallBangButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    wallBangButton.Font = Enum.Font.Gotham
+    wallBangButton.TextSize = 14
+    wallBangButton.Parent = frame
+
+    local wallBangEnabled = false
+    local wallBangConnection
+    
+    wallBangButton.MouseButton1Click:Connect(function()
+        wallBangEnabled = not wallBangEnabled
+        wallBangButton.Text = "WALL BANG: " .. (wallBangEnabled and "ON" or "OFF")
+        
+        if wallBangEnabled then
+            wallBangConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                if game:GetService("UserInputService"):IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
+                    local character = player.Character
+                    if not character then return end
+                    
+                    local tool = character:FindFirstChildOfClass("Tool")
+                    if not tool then return end
+                    
+                    -- Отключаем анимации и эффекты отдачи
+                    for _, obj in pairs(tool:GetDescendants()) do
+                        if obj:IsA("Animation") then
+                            obj:Stop()
+                        elseif obj:IsA("ValueBase") and (obj.Name:lower():match("recoil") or obj.Name:lower():match("spread")) then
+                            obj.Value = 0
+                        end
+                    end
+                    
+                    -- Отключаем перезарядку
+                    local ammoValue = tool:FindFirstChild("Ammo") or tool:FindFirstChild("StoredAmmo") or tool:FindFirstChild("Magazine")
+                    if ammoValue and ammoValue:IsA("ValueBase") then
+                        ammoValue.Value = 999999
+                    end
+                    
+                    -- Получаем позицию мыши в мире
+                    local mouse = player:GetMouse()
+                    local camera = workspace.CurrentCamera
+                    local mouseRay = camera:ScreenPointToRay(mouse.X, mouse.Y)
+                    local rayOrigin = mouseRay.Origin
+                    local rayDirection = mouseRay.Direction * 1000 -- Увеличиваем дальность луча
+                    
+                    -- Ищем всех потенциальных противников за стенами
+                    for _, target in pairs(workspace:GetDescendants()) do
+                        if target:IsA("Model") and target:FindFirstChild("Humanoid") and target ~= character then
+                            local targetHRP = target:FindFirstChild("HumanoidRootPart")
+                            if targetHRP then
+                                -- Проверяем, находится ли цель в направлении взгляда
+                                local targetPos = targetHRP.Position
+                                local toTarget = (targetPos - rayOrigin).Unit
+                                local dot = toTarget:Dot(rayDirection.Unit)
+                                
+                                if dot > 0.7 then -- Цель находится примерно в направлении взгляда
+                                    -- Стреляем через стены
+                                    local fireFunction = tool:FindFirstChild("Fire") or tool:FindFirstChild("Shoot") or tool:FindFirstChild("Attack")
+                                    if fireFunction and fireFunction:IsA("RemoteEvent") then
+                                        fireFunction:FireServer(targetPos)
+                                    else
+                                        tool:Activate()
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        else
+            if infiniteFireConnection then
+                infiniteFireConnection:Disconnect()
+            end
+        end
+    end)
+    
+    autoShootButton.MouseButton1Click:Connect(function()
+        autoShootEnabled = not autoShootEnabled
+        autoShootButton.Text = "AUTO SHOOT: " .. (autoShootEnabled and "ON" or "OFF")
+
+        if autoShootEnabled then
+            autoShootConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                local character = player.Character
+                if not character then return end
+
+                local tool = character:FindFirstChildOfClass("Tool")
+                if not tool then return end
+
+                local rootPart = character:FindFirstChild("HumanoidRootPart")
+                if not rootPart then return end
+
+                -- Улучшенный поиск мобов
+                for _, mob in pairs(workspace:GetDescendants()) do
+                    if mob:IsA("Model") and 
+                       mob:FindFirstChild("Humanoid") and 
+                       mob:FindFirstChild("HumanoidRootPart") and
+                       not game.Players:GetPlayerFromCharacter(mob) and
+                       mob.Humanoid.Health > 0 then
+                        
+                        local mobRoot = mob.HumanoidRootPart
+                        local distance = (mobRoot.Position - rootPart.Position).Magnitude
+                        
+                        if distance < 300 then -- Увеличенная дальность стрельбы
+                            local mobHead = mob:FindFirstChild("Head") or mobRoot
+                            
+                            -- Мгновенный поворот к цели
+                            rootPart.CFrame = CFrame.new(rootPart.Position, mobHead.Position)
+
+                            -- Стреляем без задержки
+                            local fireFunction = tool:FindFirstChild("Fire") or tool:FindFirstChild("Shoot") or tool:FindFirstChild("Attack")
+                            if fireFunction and fireFunction:IsA("RemoteEvent") then
+                                fireFunction:FireServer(mobHead.Position)
+                            else
+                                tool:Activate()
+                            end
+                            
+                            -- Непрерывная стрельба без задержки
+                        end
+                    end
+                end
+            end)
+        else
+            if autoShootConnection then
+                autoShootConnection:Disconnect()
+            end
+        end
     end)
 
     if autoShowMenu then
