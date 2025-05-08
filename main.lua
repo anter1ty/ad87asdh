@@ -113,7 +113,7 @@ spawn(function()
     while wait(1) do
         local time = os.date("!*t")
         local hours = (time.hour + 3) % 24
-        mskTime.Text = string.format("%02d:%02d:%02d", hours, time.min, time.sec)
+        mskTime.Text = string.format("  %02d:%02d:%02d", hours, time.min, time.sec)
     end
 end)
 
