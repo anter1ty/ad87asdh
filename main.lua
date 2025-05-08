@@ -119,25 +119,7 @@ title.Font = Enum.Font.GothamBold
 title.TextSize = 18
 title.Parent = frame
 
--- Категории
-local categories = {
-    ["VISUALS"] = {y = 40},
-    ["MOVEMENT"] = {y = 130},
-    ["WORLD"] = {y = 310}
-}
 
-for name, data in pairs(categories) do
-    local label = Instance.new("TextLabel")
-    label.Text = name
-    label.Size = UDim2.new(1, -20, 0, 20)
-    label.Position = UDim2.new(0, 10, 0, data.y)
-    label.BackgroundTransparency = 1
-    label.TextColor3 = Color3.fromRGB(0, 195, 255)
-    label.Font = Enum.Font.GothamBold
-    label.TextSize = 14
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = frame
-end
 
 -- Sky Customization
 local skyButton = Instance.new("TextButton")
@@ -173,6 +155,34 @@ local skyStyles = {
         sky.Parent = lighting
         lighting.ClockTime = 0
         lighting.Ambient = Color3.fromRGB(199, 0, 0)
+    end,
+    ["BLUE_SKY"] = function()
+        local lighting = game:GetService("Lighting")
+        local sky = Instance.new("Sky")
+        sky.Name = "CXNT_Sky"
+        sky.SkyboxBk = "rbxassetid://226060119"
+        sky.SkyboxDn = "rbxassetid://226060119"
+        sky.SkyboxFt = "rbxassetid://226060119"
+        sky.SkyboxLf = "rbxassetid://226060119"
+        sky.SkyboxRt = "rbxassetid://226060119"
+        sky.SkyboxUp = "rbxassetid://226060119"
+        sky.Parent = lighting
+        lighting.ClockTime = 14
+        lighting.Ambient = Color3.fromRGB(100, 150, 255)
+    end,
+    ["GOLDEN_HOUR"] = function()
+        local lighting = game:GetService("Lighting")
+        local sky = Instance.new("Sky")
+        sky.Name = "CXNT_Sky"
+        sky.SkyboxBk = "rbxassetid://271042516"
+        sky.SkyboxDn = "rbxassetid://271077243"
+        sky.SkyboxFt = "rbxassetid://271042556"
+        sky.SkyboxLf = "rbxassetid://271042310"
+        sky.SkyboxRt = "rbxassetid://271042467"
+        sky.SkyboxUp = "rbxassetid://271077958"
+        sky.Parent = lighting
+        lighting.ClockTime = 17.5
+        lighting.Ambient = Color3.fromRGB(255, 200, 100)
     end,
     ["DRAIN"] = function()
         local lighting = game:GetService("Lighting")
@@ -234,15 +244,45 @@ local skyStyles = {
         local lighting = game:GetService("Lighting")
         local sky = Instance.new("Sky")
         sky.Name = "CXNT_Sky"
-        sky.SkyboxBk = "rbxassetid://8107841671"
-        sky.SkyboxDn = "rbxassetid://8107841671"
-        sky.SkyboxFt = "rbxassetid://8107841671"
-        sky.SkyboxLf = "rbxassetid://8107841671"
-        sky.SkyboxRt = "rbxassetid://8107841671"
-        sky.SkyboxUp = "rbxassetid://8107841671"
+        sky.SkyboxBk = "rbxassetid://6444884337"
+        sky.SkyboxDn = "rbxassetid://6444884785"
+        sky.SkyboxFt = "rbxassetid://6444884337"
+        sky.SkyboxLf = "rbxassetid://6444884337"
+        sky.SkyboxRt = "rbxassetid://6444884337"
+        sky.SkyboxUp = "rbxassetid://6444884785"
         sky.Parent = lighting
         lighting.ClockTime = 14
         lighting.Ambient = Color3.fromRGB(255, 255, 255)
+        lighting.Brightness = 2
+        lighting.ColorShift_Top = Color3.fromRGB(255, 235, 235)
+    end,
+    ["EMERALD_SKY"] = function()
+        local lighting = game:GetService("Lighting")
+        local sky = Instance.new("Sky")
+        sky.Name = "CXNT_Sky"
+        sky.SkyboxBk = "rbxassetid://5420247395"
+        sky.SkyboxDn = "rbxassetid://5420247395"
+        sky.SkyboxFt = "rbxassetid://5420247395"
+        sky.SkyboxLf = "rbxassetid://5420247395"
+        sky.SkyboxRt = "rbxassetid://5420247395"
+        sky.SkyboxUp = "rbxassetid://5420247395"
+        sky.Parent = lighting
+        lighting.ClockTime = 14
+        lighting.Ambient = Color3.fromRGB(100, 255, 150)
+    end,
+    ["SUNSET_PARADISE"] = function()
+        local lighting = game:GetService("Lighting")
+        local sky = Instance.new("Sky")
+        sky.Name = "CXNT_Sky"
+        sky.SkyboxBk = "rbxassetid://600830446"
+        sky.SkyboxDn = "rbxassetid://600831635"
+        sky.SkyboxFt = "rbxassetid://600832720"
+        sky.SkyboxLf = "rbxassetid://600886090"
+        sky.SkyboxRt = "rbxassetid://600833862"
+        sky.SkyboxUp = "rbxassetid://600835177"
+        sky.Parent = lighting
+        lighting.ClockTime = 17.8
+        lighting.Ambient = Color3.fromRGB(255, 150, 100)
     end,
     ["PURPLE_NEBULA"] = function()
         local lighting = game:GetService("Lighting")
@@ -340,15 +380,15 @@ godModeButton.Font = Enum.Font.Gotham
 godModeButton.TextSize = 14
 godModeButton.Parent = frame
 
-local antiDetectButton = Instance.new("TextButton")
-antiDetectButton.Text = "ANTI-DETECT: OFF"
-antiDetectButton.Size = UDim2.new(0.4, -10, 0, 20)
-antiDetectButton.Position = UDim2.new(0, 10, 0, 210)
-antiDetectButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-antiDetectButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-antiDetectButton.Font = Enum.Font.Gotham
-antiDetectButton.TextSize = 14
-antiDetectButton.Parent = frame
+local skyButton = Instance.new("TextButton")
+skyButton.Text = "SKY: DEFAULT"
+skyButton.Size = UDim2.new(0.4, -10, 0, 20)
+skyButton.Position = UDim2.new(0, 10, 0, 210)
+skyButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+skyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+skyButton.Font = Enum.Font.Gotham
+skyButton.TextSize = 14
+skyButton.Parent = frame
 
 local speedLabel = Instance.new("TextLabel")
 speedLabel.Text = "SPEED PLAYER: " .. defaultWalkSpeed
@@ -567,11 +607,24 @@ end
 local function removeEsp(player)
     if espObjects[player] then
         for _, part in ipairs(espObjects[player]) do
-            part:Destroy()
+            if part and part.Parent then
+                part:Destroy()
+            end
         end
         espObjects[player] = nil
     end
 end
+
+-- Очистка ESP при смене сервера
+game:GetService("Players").PlayerRemoving:Connect(function(player)
+    removeEsp(player)
+end)
+
+game:GetService("CoreGui").DescendantRemoving:Connect(function(obj)
+    if obj.Name == "CXNT_ESP" or obj.Name == "CXNT_NameLabel" then
+        obj:Destroy()
+    end
+end)
 
 local function toggleEsp()
     espEnabled = not espEnabled
@@ -678,11 +731,30 @@ local function toggleMenu(visible)
     frame.Visible = visible
 end
 
+-- Оптимизация телепортации
+local function optimizeTeleport()
+    local teleportService = game:GetService("TeleportService")
+    local replicatedStorage = game:GetService("ReplicatedStorage")
+    
+    -- Предварительная загрузка следующего места
+    teleportService.LocalPlayerArrivedFromTeleport:Connect(function(loadingPlayer, teleportData)
+        if teleportData then
+            task.spawn(function()
+                preloadAssets()
+                optimizeServerLoading()
+            end)
+        end
+    end)
+end
+
 local function onInput(input, gameProcessed)
     if input.KeyCode == toggleKey and not gameProcessed then
         toggleMenu(not frame.Visible)
     end
 end
+
+-- Инициализируем оптимизацию телепортации
+optimizeTeleport()
 
 local function onSliderDrag()
     local isDragging = false
@@ -927,6 +999,20 @@ game:GetService("UserInputService").JumpRequest:Connect(function()
 end)
 
 local function initialize()
+    spawn(function()
+        -- Очищаем существующие ESP объекты при телепортации
+        game:GetService("Players").PlayerRemoving:Connect(function(player)
+            if espObjects[player] then
+                for _, part in ipairs(espObjects[player]) do
+                    if part and part.Parent then
+                        part:Destroy()
+                    end
+                end
+                espObjects[player] = nil
+            end
+        end)
+    end)
+    
     loadingGui:Destroy()
 
     -- Handle player leaving
@@ -1099,11 +1185,44 @@ local function initialize()
     autoHealButton.TextSize = 14
     autoHealButton.Parent = frame
 
+    -- Aimbot Button
+    local aimbotButton = Instance.new("TextButton")
+    aimbotButton.Text = "AIMBOT: OFF"
+    aimbotButton.Size = UDim2.new(0.4, -10, 0, 20)
+    aimbotButton.Position = UDim2.new(0.6, 0, 0, 90)
+    aimbotButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    aimbotButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    aimbotButton.Font = Enum.Font.Gotham
+    aimbotButton.TextSize = 14
+    aimbotButton.Parent = frame
+
+    -- Silent Aim Button
+    local silentAimButton = Instance.new("TextButton")
+    silentAimButton.Text = "SILENT AIM: OFF"
+    silentAimButton.Size = UDim2.new(0.4, -10, 0, 20)
+    silentAimButton.Position = UDim2.new(0.6, 0, 0, 120)
+    silentAimButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    silentAimButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    silentAimButton.Font = Enum.Font.Gotham
+    silentAimButton.TextSize = 14
+    silentAimButton.Parent = frame
+
+    -- Auto Collect Button
+    local autoCollectButton = Instance.new("TextButton")
+    autoCollectButton.Text = "AUTO COLLECT: OFF"
+    autoCollectButton.Size = UDim2.new(0.4, -10, 0, 20)
+    autoCollectButton.Position = UDim2.new(0.6, 0, 0, 150)
+    autoCollectButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    autoCollectButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    autoCollectButton.Font = Enum.Font.Gotham
+    autoCollectButton.TextSize = 14
+    autoCollectButton.Parent = frame
+
     -- Rapid Attack Button
     local rapidAttackButton = Instance.new("TextButton")
     rapidAttackButton.Text = "RAPID ATTACK: OFF"
     rapidAttackButton.Size = UDim2.new(0.4, -10, 0, 20)
-    rapidAttackButton.Position = UDim2.new(0, 10, 0, 420)
+    rapidAttackButton.Position = UDim2.new(0.6, 0, 0, 180)
     rapidAttackButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     rapidAttackButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     rapidAttackButton.Font = Enum.Font.Gotham
@@ -1167,6 +1286,130 @@ local function initialize()
         end
     end)
 
+    -- Aimbot functionality
+    local aimbotEnabled = false
+    local aimbotConnection
+    local targetPlayer = nil
+
+    aimbotButton.MouseButton1Click:Connect(function()
+        aimbotEnabled = not aimbotEnabled
+        aimbotButton.Text = "AIMBOT: " .. (aimbotEnabled and "ON" or "OFF")
+
+        if aimbotEnabled then
+            aimbotConnection = game:GetService("RunService").RenderStepped:Connect(function()
+                local nearestDistance = math.huge
+                local nearestPlayer = nil
+                local myCharacter = player.Character
+                if not myCharacter or not myCharacter:FindFirstChild("HumanoidRootPart") then return end
+
+                for _, otherPlayer in pairs(game.Players:GetPlayers()) do
+                    if otherPlayer ~= player and otherPlayer.Character and 
+                       otherPlayer.Character:FindFirstChild("HumanoidRootPart") and
+                       otherPlayer.Character:FindFirstChild("Humanoid") and
+                       otherPlayer.Character.Humanoid.Health > 0 then
+                        
+                        local distance = (otherPlayer.Character.HumanoidRootPart.Position - myCharacter.HumanoidRootPart.Position).Magnitude
+                        if distance < nearestDistance then
+                            nearestDistance = distance
+                            nearestPlayer = otherPlayer
+                        end
+                    end
+                end
+
+                if nearestPlayer and nearestPlayer.Character then
+                    local head = nearestPlayer.Character:FindFirstChild("Head")
+                    if head then
+                        workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, head.Position)
+                    end
+                end
+            end)
+        else
+            if aimbotConnection then
+                aimbotConnection:Disconnect()
+            end
+        end
+    end)
+
+    -- Silent Aim functionality
+    local silentAimEnabled = false
+    local silentAimConnection
+    
+    silentAimButton.MouseButton1Click:Connect(function()
+        silentAimEnabled = not silentAimEnabled
+        silentAimButton.Text = "SILENT AIM: " .. (silentAimEnabled and "ON" or "OFF")
+
+        if silentAimEnabled then
+            silentAimConnection = game:GetService("RunService").RenderStepped:Connect(function()
+                local nearestDistance = math.huge
+                local nearestPlayer = nil
+                local myCharacter = player.Character
+                if not myCharacter or not myCharacter:FindFirstChild("HumanoidRootPart") then return end
+
+                for _, otherPlayer in pairs(game.Players:GetPlayers()) do
+                    if otherPlayer ~= player and otherPlayer.Character and 
+                       otherPlayer.Character:FindFirstChild("HumanoidRootPart") and
+                       otherPlayer.Character:FindFirstChild("Humanoid") and
+                       otherPlayer.Character.Humanoid.Health > 0 then
+                        
+                        local distance = (otherPlayer.Character.HumanoidRootPart.Position - myCharacter.HumanoidRootPart.Position).Magnitude
+                        if distance < nearestDistance then
+                            nearestDistance = distance
+                            nearestPlayer = otherPlayer
+                        end
+                    end
+                end
+
+                if nearestPlayer and nearestPlayer.Character then
+                    local head = nearestPlayer.Character:FindFirstChild("Head")
+                    if head then
+                        targetPlayer = nearestPlayer
+                    end
+                end
+            end)
+        else
+            if silentAimConnection then
+                silentAimConnection:Disconnect()
+            end
+            targetPlayer = nil
+        end
+    end)
+
+    -- Auto Collect functionality
+    local autoCollectEnabled = false
+    local autoCollectConnection
+
+    autoCollectButton.MouseButton1Click:Connect(function()
+        autoCollectEnabled = not autoCollectEnabled
+        autoCollectButton.Text = "AUTO COLLECT: " .. (autoCollectEnabled and "ON" or "OFF")
+
+        if autoCollectEnabled then
+            autoCollectConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                local character = player.Character
+                if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+
+                local rootPart = character.HumanoidRootPart
+                local collectRadius = 50 -- Радиус сбора предметов
+
+                for _, item in pairs(workspace:GetDescendants()) do
+                    if item:IsA("BasePart") and 
+                       (item.Name:lower():find("item") or 
+                        item.Name:lower():find("pickup") or 
+                        item.Name:lower():find("collect")) then
+                        
+                        local distance = (item.Position - rootPart.Position).Magnitude
+                        if distance <= collectRadius then
+                            item.CFrame = rootPart.CFrame
+                        end
+                    end
+                end
+            end)
+        else
+            if autoCollectConnection then
+                autoCollectConnection:Disconnect()
+            end
+        end
+    end)
+
     rapidAttackButton.MouseButton1Click:Connect(function()
         rapidAttackEnabled = not rapidAttackEnabled
         rapidAttackButton.Text = "RAPID ATTACK: " .. (rapidAttackEnabled and "ON" or "OFF")
@@ -1190,7 +1433,7 @@ local function initialize()
 
     -- Sky customization
     skyButton.MouseButton1Click:Connect(function()
-        local styles = {"DEFAULT", "DARK_RED_MOON", "DRAIN", "BRIGHT", "NIGHT_STARS", "SUNSET", "ANIME_SKY", "PURPLE_NEBULA", "VAPORWAVE", "SPACE"}
+        local styles = {"DEFAULT", "DARK_RED_MOON", "BLUE_SKY", "GOLDEN_HOUR", "DRAIN", "BRIGHT", "NIGHT_STARS", "SUNSET", "ANIME_SKY", "PURPLE_NEBULA", "VAPORWAVE", "SPACE", "EMERALD_SKY", "SUNSET_PARADISE"}
         local currentIndex = table.find(styles, currentSkyStyle)
         currentSkyStyle = styles[currentIndex % #styles + 1]
         skyButton.Text = "SKY: " .. currentSkyStyle
