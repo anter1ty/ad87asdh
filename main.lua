@@ -79,7 +79,7 @@ spawn(function()
     end
 end)
 
--- Watermark with time
+-- Watermark with time and image
 local watermark = Instance.new("TextLabel")
 watermark.Text = "CXNT V1"
 watermark.Size = UDim2.new(0, 250, 0, 30)
@@ -93,6 +93,21 @@ watermark.TextXAlignment = Enum.TextXAlignment.Left
 watermark.TextStrokeTransparency = 0.5
 watermark.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
 watermark.Parent = gui
+
+-- Add clickable image under watermark
+local imageButton = Instance.new("ImageButton")
+imageButton.Size = UDim2.new(0, 50, 0, 50)  -- Small size for the image
+imageButton.Position = UDim2.new(0, 10, 0, 35)  -- Position under watermark
+imageButton.Image = "rbxassetid://15729160523"  -- Using Roblox asset ID
+imageButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)  -- White background
+imageButton.BackgroundTransparency = 0.5  -- Semi-transparent background
+imageButton.ScaleType = Enum.ScaleType.Fit
+imageButton.Parent = gui
+
+-- Add click functionality
+imageButton.MouseButton1Click:Connect(function()
+    frame.Visible = not frame.Visible
+end)
 
 -- MSK Time next to watermark
 local mskTime = Instance.new("TextLabel")
@@ -131,13 +146,29 @@ title.Parent = frame
 
 -- Sky Customization
 local skyButton = Instance.new("TextButton")
+skyButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+skyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+skyButton.Font = Enum.Font.GothamSemibold
+skyButton.TextSize = 14
+skyButton.BorderSizePixel = 0
+skyButton.AutoButtonColor = true
+
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.Parent = skyButton
+
+-- Add hover effect
+local originalColor = skyButton.BackgroundColor3
+skyButton.MouseEnter:Connect(function()
+    skyButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+end)
+skyButton.MouseLeave:Connect(function()
+    skyButton.BackgroundColor3 = originalColor
+end)
 skyButton.Text = "SKY: DEFAULT"
 skyButton.Size = UDim2.new(0.4, -10, 0, 20)
 skyButton.Position = UDim2.new(0, 10, 0, 420)
-skyButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-skyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-skyButton.Font = Enum.Font.Gotham
-skyButton.TextSize = 14
 skyButton.Parent = frame
 
 local currentSkyStyle = "DEFAULT"
@@ -338,64 +369,160 @@ local skyStyles = {
 
 -- Кнопка ESP
 local espButton = Instance.new("TextButton")
+espButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+espButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+espButton.Font = Enum.Font.GothamSemibold
+espButton.TextSize = 14
+espButton.BorderSizePixel = 0
+espButton.AutoButtonColor = true
+
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.Parent = espButton
+
+-- Add hover effect
+local originalColor = espButton.BackgroundColor3
+espButton.MouseEnter:Connect(function()
+    espButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+end)
+espButton.MouseLeave:Connect(function()
+    espButton.BackgroundColor3 = originalColor
+end)
 espButton.Text = "ESP: OFF"
 espButton.Size = UDim2.new(0.4, -10, 0, 20)
 espButton.Position = UDim2.new(0, 10, 0, 90)
 
 local itemEspButton = Instance.new("TextButton")
+itemEspButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+itemEspButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+itemEspButton.Font = Enum.Font.GothamSemibold
+itemEspButton.TextSize = 14
+itemEspButton.BorderSizePixel = 0
+itemEspButton.AutoButtonColor = true
+
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.Parent = itemEspButton
+
+-- Add hover effect
+local originalColor = itemEspButton.BackgroundColor3
+itemEspButton.MouseEnter:Connect(function()
+    itemEspButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+end)
+itemEspButton.MouseLeave:Connect(function()
+    itemEspButton.BackgroundColor3 = originalColor
+end)
 itemEspButton.Text = "ITEM ESP: OFF"
 itemEspButton.Size = UDim2.new(0.4, -10, 0, 20)
 itemEspButton.Position = UDim2.new(0, 10, 0, 450)
-itemEspButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-itemEspButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-itemEspButton.Font = Enum.Font.Gotham
-itemEspButton.TextSize = 14
 itemEspButton.Parent = frame
-espButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-espButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-espButton.Font = Enum.Font.Gotham
-espButton.TextSize = 14
 espButton.Parent = frame
 
 local noclipButton = Instance.new("TextButton")
+noclipButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+noclipButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+noclipButton.Font = Enum.Font.GothamSemibold
+noclipButton.TextSize = 14
+noclipButton.BorderSizePixel = 0
+noclipButton.AutoButtonColor = true
+
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.Parent = noclipButton
+
+-- Add hover effect
+local originalColor = noclipButton.BackgroundColor3
+noclipButton.MouseEnter:Connect(function()
+    noclipButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+end)
+noclipButton.MouseLeave:Connect(function()
+    noclipButton.BackgroundColor3 = originalColor
+end)
 noclipButton.Text = "NOCLIP: OFF"
 noclipButton.Size = UDim2.new(0.4, -10, 0, 20)
 noclipButton.Position = UDim2.new(0, 10, 0, 120)
-noclipButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-noclipButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-noclipButton.Font = Enum.Font.Gotham
-noclipButton.TextSize = 14
 noclipButton.Parent = frame
 
 -- Кнопка Spin
 local spinButton = Instance.new("TextButton")
+spinButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+spinButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+spinButton.Font = Enum.Font.GothamSemibold
+spinButton.TextSize = 14
+spinButton.BorderSizePixel = 0
+spinButton.AutoButtonColor = true
+
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.Parent = spinButton
+
+-- Add hover effect
+local originalColor = spinButton.BackgroundColor3
+spinButton.MouseEnter:Connect(function()
+    spinButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+end)
+spinButton.MouseLeave:Connect(function()
+    spinButton.BackgroundColor3 = originalColor
+end)
 spinButton.Text = "SPIN: OFF"
 spinButton.Size = UDim2.new(0.4, -10, 0, 20)
 spinButton.Position = UDim2.new(0, 10, 0, 150)
-spinButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-spinButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-spinButton.Font = Enum.Font.Gotham
-spinButton.TextSize = 14
 spinButton.Parent = frame
 
 local godModeButton = Instance.new("TextButton")
+godModeButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+godModeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+godModeButton.Font = Enum.Font.GothamSemibold
+godModeButton.TextSize = 14
+godModeButton.BorderSizePixel = 0
+godModeButton.AutoButtonColor = true
+
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.Parent = godModeButton
+
+-- Add hover effect
+local originalColor = godModeButton.BackgroundColor3
+godModeButton.MouseEnter:Connect(function()
+    godModeButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+end)
+godModeButton.MouseLeave:Connect(function()
+    godModeButton.BackgroundColor3 = originalColor
+end)
 godModeButton.Text = "GODMODE: OFF"
 godModeButton.Size = UDim2.new(0.4, -10, 0, 20)
 godModeButton.Position = UDim2.new(0, 10, 0, 180)
-godModeButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-godModeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-godModeButton.Font = Enum.Font.Gotham
-godModeButton.TextSize = 14
 godModeButton.Parent = frame
 
 local skyButton = Instance.new("TextButton")
+skyButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+skyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+skyButton.Font = Enum.Font.GothamSemibold
+skyButton.TextSize = 14
+skyButton.BorderSizePixel = 0
+skyButton.AutoButtonColor = true
+
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.Parent = skyButton
+
+-- Add hover effect
+local originalColor = skyButton.BackgroundColor3
+skyButton.MouseEnter:Connect(function()
+    skyButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+end)
+skyButton.MouseLeave:Connect(function()
+    skyButton.BackgroundColor3 = originalColor
+end)
 skyButton.Text = "SKY: DEFAULT"
 skyButton.Size = UDim2.new(0.4, -10, 0, 20)
 skyButton.Position = UDim2.new(0, 10, 0, 210)
-skyButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-skyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-skyButton.Font = Enum.Font.Gotham
-skyButton.TextSize = 14
 skyButton.Parent = frame
 
 
@@ -478,7 +605,7 @@ local function createItemEsp(item)
     local text = Instance.new("TextLabel")
     text.Size = UDim2.new(1, 0, 1, 0)
     text.BackgroundTransparency = 1
-    text.TextColor3 = Color3.new(1, 1, 1)
+    text.TextColor3 = Color3.new(1,1, 1)
     text.TextStrokeTransparency = 0
     text.TextStrokeColor3 = Color3.new(0, 0, 0)
     text.Text = item.Name
@@ -1050,13 +1177,29 @@ end
 
 -- Кнопка для превращения в свинью
 local pigButton = Instance.new("TextButton")
+pigButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+pigButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+pigButton.Font = Enum.Font.GothamSemibold
+pigButton.TextSize = 14
+pigButton.BorderSizePixel = 0
+pigButton.AutoButtonColor = true
+
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.Parent = pigButton
+
+-- Add hover effect
+local originalColor = pigButton.BackgroundColor3
+pigButton.MouseEnter:Connect(function()
+    pigButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+end)
+pigButton.MouseLeave:Connect(function()
+    pigButton.BackgroundColor3 = originalColor
+end)
 pigButton.Text = "MORPH TO PIG"
 pigButton.Size = UDim2.new(0.4, -10, 0, 20)
 pigButton.Position = UDim2.new(0, 10, 0, 240)
-pigButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-pigButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-pigButton.Font = Enum.Font.Gotham
-pigButton.TextSize = 14
 pigButton.Parent = frame
 
 -- Infinity Jump
@@ -1071,14 +1214,30 @@ local lastClickPosition = nil
 
 local infinityJumpEnabled = false
 local infinityJumpButton = Instance.new("TextButton")
+infinityJumpButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+infinityJumpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+infinityJumpButton.Font = Enum.Font.GothamSemibold
+infinityJumpButton.TextSize = 14
+infinityJumpButton.BorderSizePixel = 0
+infinityJumpButton.AutoButtonColor = true
+
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.Parent = infinityJumpButton
+
+-- Add hover effect
+local originalColor = infinityJumpButton.BackgroundColor3
+infinityJumpButton.MouseEnter:Connect(function()
+    infinityJumpButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+end)
+infinityJumpButton.MouseLeave:Connect(function()
+    infinityJumpButton.BackgroundColor3 = originalColor
+end)
 infinityJumpButton.Text = "INFINITY JUMP: OFF"
 infinityJumpButton.Position = UDim2.new(0, 10, 0, 390)
 infinityJumpButton.Size = UDim2.new(0.4, -10, 0, 20)
 infinityJumpButton.Position = UDim2.new(0, 10, 0, 270)
-infinityJumpButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-infinityJumpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-infinityJumpButton.Font = Enum.Font.Gotham
-infinityJumpButton.TextSize = 14
 infinityJumpButton.Parent = frame
 
 local function toggleInfinityJump()
@@ -1095,7 +1254,72 @@ game:GetService("UserInputService").JumpRequest:Connect(function()
     end
 end)
 
+-- Функция для отключения всех функций
+local function disableAllFeatures()
+    -- Отключаем ESP
+    espEnabled = false
+    espButton.Text = "ESP: OFF"
+    for player in pairs(espObjects) do
+        removeEsp(player)
+    end
+
+    -- Отключаем Item ESP
+    if next(itemEspObjects) then
+        for _, objects in pairs(itemEspObjects) do
+            if objects.highlight then objects.highlight:Destroy() end
+            if objects.label then objects.label:Destroy() end
+        end
+        itemEspObjects = {}
+        itemEspButton.Text = "ITEM ESP: OFF"
+    end
+
+    -- Отключаем Noclip
+    noclipEnabled = false
+    noclipButton.Text = "NOCLIP: OFF"
+
+    -- Отключаем Spin
+    spinEnabled = false
+    spinButton.Text = "SPIN: OFF"
+    for char, conn in pairs(spinConnections) do
+        conn:Disconnect()
+        local humanoidRootPart = char:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            humanoidRootPart.Anchored = false
+        end
+    end
+    spinConnections = {}
+
+    -- Отключаем GodMode
+    godModeEnabled = false
+    godModeButton.Text = "GODMODE: OFF"
+
+    -- Отключаем Auto Heal
+    autoHealEnabled = false
+    if healConnection then
+        healConnection:Disconnect()
+        healConnection = nil
+    end
+    autoHealButton.Text = "AUTO HEAL: OFF"
+
+    -- Сбрасываем небо на стандартное
+    skyStyles["DEFAULT"]()
+    skyButton.Text = "SKY: DEFAULT"
+
+    -- Отключаем все остальные функции...
+    frame.Visible = false
+end
+
+-- Инициализация
 local function initialize()
+    spawn(function()
+        -- Отслеживаем смену сервера
+        game:GetService("CoreGui").ChildRemoved:Connect(function(child)
+            if child == gui then
+                disableAllFeatures()
+            end
+        end)
+    end)
+
     spawn(function()
         -- Очищаем существующие ESP объекты при телепортации
         game:GetService("Players").PlayerRemoving:Connect(function(player)
@@ -1146,13 +1370,29 @@ local function initialize()
 
     -- Click Teleport button
     local teleportButton = Instance.new("TextButton")
+    teleportButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+teleportButton.Font = Enum.Font.GothamSemibold
+teleportButton.TextSize = 14
+teleportButton.BorderSizePixel = 0
+teleportButton.AutoButtonColor = true
+
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.Parent = teleportButton
+
+-- Add hover effect
+local originalColor = teleportButton.BackgroundColor3
+teleportButton.MouseEnter:Connect(function()
+    teleportButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+end)
+teleportButton.MouseLeave:Connect(function()
+    teleportButton.BackgroundColor3 = originalColor
+end)
     teleportButton.Text = "CLICK TELEPORT: OFF"
     teleportButton.Size = UDim2.new(0.4, -10, 0, 20)
     teleportButton.Position = UDim2.new(0, 10, 0, 300)
-    teleportButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    teleportButton.Font = Enum.Font.Gotham
-    teleportButton.TextSize = 14
     teleportButton.Parent = frame
 
     local teleportEnabled = false
@@ -1179,13 +1419,29 @@ local function initialize()
 
     -- Fly Button
     local flyButton = Instance.new("TextButton")
+flyButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+flyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+flyButton.Font = Enum.Font.GothamSemibold
+flyButton.TextSize = 14
+flyButton.BorderSizePixel = 0
+flyButton.AutoButtonColor = true
+
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.Parent = flyButton
+
+-- Add hover effect
+local originalColor = flyButton.BackgroundColor3
+flyButton.MouseEnter:Connect(function()
+    flyButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+end)
+flyButton.MouseLeave:Connect(function()
+    flyButton.BackgroundColor3 = originalColor
+end)
     flyButton.Text = "FLY: OFF"
     flyButton.Size = UDim2.new(0.4, -10, 0, 20)
     flyButton.Position = UDim2.new(0, 10, 0, 330)
-    flyButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    flyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    flyButton.Font = Enum.Font.Gotham
-    flyButton.TextSize = 14
     flyButton.Parent = frame
 
     local flyEnabled = false
@@ -1247,18 +1503,34 @@ local function initialize()
 
     -- Invisibility Button
     local invisibilityButton = Instance.new("TextButton")
+invisibilityButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+invisibilityButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+invisibilityButton.Font = Enum.Font.GothamSemibold
+invisibilityButton.TextSize = 14
+invisibilityButton.BorderSizePixel = 0
+invisibilityButton.AutoButtonColor = true
+
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.Parent = invisibilityButton
+
+-- Add hover effect
+local originalColor = invisibilityButton.BackgroundColor3
+invisibilityButton.MouseEnter:Connect(function()
+    invisibilityButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+end)
+invisibilityButton.MouseLeave:Connect(function()
+    invisibilityButton.BackgroundColor3 = originalColor
+end)
     invisibilityButton.Text = "INVISIBILITY: OFF"
     invisibilityButton.Size = UDim2.new(0.4, -10, 0, 20)
     invisibilityButton.Position = UDim2.new(0, 10, 0, 360)
-    invisibilityButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    invisibilityButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    invisibilityButton.Font = Enum.Font.Gotham
-    invisibilityButton.TextSize = 14
     invisibilityButton.Parent = frame
 
     local isInvisible = false
     local invisibilityConnection
-    
+
     invisibilityButton.MouseButton1Click:Connect(function()
         isInvisible = not isInvisible
         invisibilityButton.Text = "INVISIBILITY: " .. (isInvisible and "ON" or "OFF")
@@ -1283,16 +1555,16 @@ local function initialize()
                     for _, mob in pairs(workspace:GetDescendants()) do
                         if mob:IsA("Model") and mob:FindFirstChild("Humanoid") and 
                            not game.Players:GetPlayerFromCharacter(mob) then
-                            
+
                             local mobHumanoid = mob:FindFirstChild("Humanoid")
                             local mobRoot = mob:FindFirstChild("HumanoidRootPart")
-                            
+
                             if mobHumanoid and mobRoot then
                                 -- Заставляем моба идти в противоположном направлении
                                 local direction = (mobRoot.Position - humanoidRootPart.Position).Unit
                                 local targetPos = mobRoot.Position + direction * 50
                                 mobHumanoid:MoveTo(targetPos)
-                                
+
                                 -- Отключаем атаку
                                 mobHumanoid.AutoRotate = false
                                 for _, state in pairs(Enum.HumanoidStateType:GetEnumItems()) do
@@ -1309,11 +1581,11 @@ local function initialize()
                 if invisibilityConnection then
                     invisibilityConnection:Disconnect()
                 end
-                
+
                 for _, mob in pairs(workspace:GetDescendants()) do
                     if mob:IsA("Model") and mob:FindFirstChild("Humanoid") and 
                        not game.Players:GetPlayerFromCharacter(mob) then
-                        
+
                         local mobHumanoid = mob:FindFirstChild("Humanoid")
                         if mobHumanoid then
                             mobHumanoid.AutoRotate = true
@@ -1330,79 +1602,191 @@ local function initialize()
     -- Rapid Attack Button
     -- Auto Heal Button
     local autoHealButton = Instance.new("TextButton")
+autoHealButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+autoHealButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+autoHealButton.Font = Enum.Font.GothamSemibold
+autoHealButton.TextSize = 14
+autoHealButton.BorderSizePixel = 0
+autoHealButton.AutoButtonColor = true
+
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.Parent = autoHealButton
+
+-- Add hover effect
+local originalColor = autoHealButton.BackgroundColor3
+autoHealButton.MouseEnter:Connect(function()
+    autoHealButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+end)
+autoHealButton.MouseLeave:Connect(function()
+    autoHealButton.BackgroundColor3 = originalColor
+end)
     autoHealButton.Text = "AUTO HEAL: OFF"
     autoHealButton.Size = UDim2.new(0.4, -10, 0, 20)
     autoHealButton.Position = UDim2.new(0, 10, 0, 390)
-    autoHealButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    autoHealButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    autoHealButton.Font = Enum.Font.Gotham
-    autoHealButton.TextSize = 14
     autoHealButton.Parent = frame
 
     -- Aimbot Button
     local aimbotButton = Instance.new("TextButton")
+aimbotButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+aimbotButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+aimbotButton.Font = Enum.Font.GothamSemibold
+aimbotButton.TextSize = 14
+aimbotButton.BorderSizePixel = 0
+aimbotButton.AutoButtonColor = true
+
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.Parent = aimbotButton
+
+-- Add hover effect
+local originalColor = aimbotButton.BackgroundColor3
+aimbotButton.MouseEnter:Connect(function()
+    aimbotButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+end)
+aimbotButton.MouseLeave:Connect(function()
+    aimbotButton.BackgroundColor3 = originalColor
+end)
     aimbotButton.Text = "AIMBOT: OFF"
     aimbotButton.Size = UDim2.new(0.4, -10, 0, 20)
     aimbotButton.Position = UDim2.new(0.6, 0, 0, 90)
-    aimbotButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    aimbotButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    aimbotButton.Font = Enum.Font.Gotham
-    aimbotButton.TextSize = 14
     aimbotButton.Parent = frame
 
     -- Mob Aimbot Button
     local mobAimbotButton = Instance.new("TextButton")
+mobAimbotButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+mobAimbotButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+mobAimbotButton.Font = Enum.Font.GothamSemibold
+mobAimbotButton.TextSize = 14
+mobAimbotButton.BorderSizePixel = 0
+mobAimbotButton.AutoButtonColor = true
+
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.Parent = mobAimbotButton
+
+-- Add hover effect
+local originalColor = mobAimbotButton.BackgroundColor3
+mobAimbotButton.MouseEnter:Connect(function()
+    mobAimbotButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+end)
+mobAimbotButton.MouseLeave:Connect(function()
+    mobAimbotButton.BackgroundColor3 = originalColor
+end)
     mobAimbotButton.Text = "MOB AIMBOT: OFF"
     mobAimbotButton.Size = UDim2.new(0.4, -10, 0, 20)
     mobAimbotButton.Position = UDim2.new(0.6, 0, 0, 120)
-    mobAimbotButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    mobAimbotButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    mobAimbotButton.Font = Enum.Font.Gotham
-    mobAimbotButton.TextSize = 14
     mobAimbotButton.Parent = frame
 
     -- Auto Collect Button
     local autoCollectButton = Instance.new("TextButton")
+autoCollectButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+autoCollectButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+autoCollectButton.Font = Enum.Font.GothamSemibold
+autoCollectButton.TextSize = 14
+autoCollectButton.BorderSizePixel = 0
+autoCollectButton.AutoButtonColor = true
+
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.Parent = autoCollectButton
+
+-- Add hover effect
+local originalColor = autoCollectButton.BackgroundColor3
+autoCollectButton.MouseEnter:Connect(function()
+    autoCollectButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+end)
+autoCollectButton.MouseLeave:Connect(function()
+    autoCollectButton.BackgroundColor3 = originalColor
+end)
     autoCollectButton.Text = "AUTO COLLECT: OFF"
     autoCollectButton.Size = UDim2.new(0.4, -10, 0, 20)
     autoCollectButton.Position = UDim2.new(0.6, 0, 0, 150)
-    autoCollectButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    autoCollectButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    autoCollectButton.Font = Enum.Font.Gotham
-    autoCollectButton.TextSize = 14
     autoCollectButton.Parent = frame
 
     -- Rapid Attack Button
     local rapidAttackButton = Instance.new("TextButton")
+rapidAttackButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+rapidAttackButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+rapidAttackButton.Font = Enum.Font.GothamSemibold
+rapidAttackButton.TextSize = 14
+rapidAttackButton.BorderSizePixel = 0
+rapidAttackButton.AutoButtonColor = true
+
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.Parent = rapidAttackButton
+
+-- Add hover effect
+local originalColor = rapidAttackButton.BackgroundColor3
+rapidAttackButton.MouseEnter:Connect(function()
+    rapidAttackButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+end)
+rapidAttackButton.MouseLeave:Connect(function()
+    rapidAttackButton.BackgroundColor3 = originalColor
+end)
     rapidAttackButton.Text = "RAPID ATTACK: OFF"
     rapidAttackButton.Size = UDim2.new(0.4, -10, 0, 20)
     rapidAttackButton.Position = UDim2.new(0.6, 0, 0, 180)
-    rapidAttackButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    rapidAttackButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    rapidAttackButton.Font = Enum.Font.Gotham
-    rapidAttackButton.TextSize = 14
     rapidAttackButton.Parent = frame
 
     -- Auto Shoot Button
     local autoShootButton = Instance.new("TextButton")
+autoShootButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+autoShootButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+autoShootButton.Font = Enum.Font.GothamSemibold
+autoShootButton.TextSize = 14
+autoShootButton.BorderSizePixel = 0
+autoShootButton.AutoButtonColor = true
+
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.Parent = autoShootButton
+
+-- Add hover effect
+local originalColor = autoShootButton.BackgroundColor3
+autoShootButton.MouseEnter:Connect(function()
+    autoShootButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+end)
+autoShootButton.MouseLeave:Connect(function()
+    autoShootButton.BackgroundColor3 = originalColor
+end)
     autoShootButton.Text = "AUTO SHOOT: OFF"
     autoShootButton.Size = UDim2.new(0.4, -10, 0, 20)
     autoShootButton.Position = UDim2.new(0.6, 0, 0, 210)
-    autoShootButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    autoShootButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    autoShootButton.Font = Enum.Font.Gotham
-    autoShootButton.TextSize = 14
     autoShootButton.Parent = frame
 
     -- Ammo Hack Button
     local ammoHackButton = Instance.new("TextButton")
+ammoHackButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+ammoHackButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ammoHackButton.Font = Enum.Font.GothamSemibold
+ammoHackButton.TextSize = 14
+ammoHackButton.BorderSizePixel = 0
+ammoHackButton.AutoButtonColor = true
+
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.Parent = ammoHackButton
+
+-- Add hover effect
+local originalColor = ammoHackButton.BackgroundColor3
+ammoHackButton.MouseEnter:Connect(function()
+    ammoHackButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+end)
+ammoHackButton.MouseLeave:Connect(function()
+    ammoHackButton.BackgroundColor3 = originalColor
+end)
     ammoHackButton.Text = "INFINITE AMMO: OFF"
     ammoHackButton.Size = UDim2.new(0.4, -10, 0, 20)
     ammoHackButton.Position = UDim2.new(0.6, 0, 0, 240)
-    ammoHackButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    ammoHackButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    ammoHackButton.Font = Enum.Font.Gotham
-    ammoHackButton.TextSize = 14
     ammoHackButton.Parent = frame
 
     local ammoHackEnabled = false
@@ -1441,7 +1825,7 @@ local function initialize()
                                         end
                                     end
                                 end
-                                
+
                                 -- Проверяем специальные конфигурации
                                 if v.Name == "Config" or v.Name == "Settings" or v.Name == "GunStats" then
                                     setInfiniteAmmo(v)
@@ -1451,7 +1835,7 @@ local function initialize()
 
                         -- Применяем к текущему оружию
                         setInfiniteAmmo(tool)
-                        
+
                         -- Перехватываем события изменения патронов
                         tool.Changed:Connect(function()
                             if ammoHackEnabled then
@@ -1510,14 +1894,32 @@ local function initialize()
                     healConnection:Disconnect()
                 end
 
-                humanoid.MaxHealth = 100000
-                humanoid.Health = 100000
+                humanoid.MaxHealth = math.huge
+                humanoid.Health = math.huge
+
+                -- Обновляем текст над головой
+                local healthGui = Instance.new("BillboardGui")
+                healthGui.Name = "HealthDisplay"
+                healthGui.Size = UDim2.new(0, 100, 0, 40)
+                healthGui.StudsOffset = Vector3.new(0, 2, 0)
+                healthGui.AlwaysOnTop = true
+                healthGui.Parent = char
+
+                local healthLabel = Instance.new("TextLabel")
+                healthLabel.Size = UDim2.new(1, 0, 1, 0)
+                healthLabel.BackgroundTransparency = 1
+                healthLabel.TextColor3 = Color3.new(0, 1, 0)
+                healthLabel.Text = "∞ HP"
+                healthLabel.TextScaled = true
+                healthLabel.Font = Enum.Font.GothamBold
+                healthLabel.Parent = healthGui
 
                 healConnection = humanoid.HealthChanged:Connect(function(health)
-                    if autoHealEnabled and health < humanoid.MaxHealth then
+                    if autoHealEnabled then
                         task.wait() -- Небольшая задержка для стабильности
                         if humanoid and humanoid.Parent and autoHealEnabled then
-                            humanoid.Health = 100000
+                            humanoid.Health = math.huge
+                            healthLabel.Text = "∞ HP"
                         end
                     end
                 end)
@@ -1710,31 +2112,47 @@ local function initialize()
 
     -- Wall Bang functionality
     local wallBangButton = Instance.new("TextButton")
+wallBangButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+wallBangButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+wallBangButton.Font = Enum.Font.GothamSemibold
+wallBangButton.TextSize = 14
+wallBangButton.BorderSizePixel = 0
+wallBangButton.AutoButtonColor = true
+
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.Parent = wallBangButton
+
+-- Add hover effect
+local originalColor = wallBangButton.BackgroundColor3
+wallBangButton.MouseEnter:Connect(function()
+    wallBangButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+end)
+wallBangButton.MouseLeave:Connect(function()
+    wallBangButton.BackgroundColor3 = originalColor
+end)
     wallBangButton.Text = "WALL BANG: OFF"
     wallBangButton.Size = UDim2.new(0.4, -10, 0, 20)
     wallBangButton.Position = UDim2.new(0.6, 0, 0, 270)
-    wallBangButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    wallBangButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    wallBangButton.Font = Enum.Font.Gotham
-    wallBangButton.TextSize = 14
     wallBangButton.Parent = frame
 
     local wallBangEnabled = false
     local wallBangConnection
-    
+
     wallBangButton.MouseButton1Click:Connect(function()
         wallBangEnabled = not wallBangEnabled
         wallBangButton.Text = "WALL BANG: " .. (wallBangEnabled and "ON" or "OFF")
-        
+
         if wallBangEnabled then
             wallBangConnection = game:GetService("RunService").Heartbeat:Connect(function()
                 if game:GetService("UserInputService"):IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
                     local character = player.Character
                     if not character then return end
-                    
+
                     local tool = character:FindFirstChildOfClass("Tool")
                     if not tool then return end
-                    
+
                     -- Отключаем анимации и эффекты отдачи
                     for _, obj in pairs(tool:GetDescendants()) do
                         if obj:IsA("Animation") then
@@ -1743,20 +2161,20 @@ local function initialize()
                             obj.Value = 0
                         end
                     end
-                    
+
                     -- Отключаем перезарядку
                     local ammoValue = tool:FindFirstChild("Ammo") or tool:FindFirstChild("StoredAmmo") or tool:FindFirstChild("Magazine")
                     if ammoValue and ammoValue:IsA("ValueBase") then
                         ammoValue.Value = 999999
                     end
-                    
+
                     -- Получаем позицию мыши в мире
                     local mouse = player:GetMouse()
                     local camera = workspace.CurrentCamera
                     local mouseRay = camera:ScreenPointToRay(mouse.X, mouse.Y)
                     local rayOrigin = mouseRay.Origin
                     local rayDirection = mouseRay.Direction * 1000 -- Увеличиваем дальность луча
-                    
+
                     -- Ищем всех потенциальных противников за стенами
                     for _, target in pairs(workspace:GetDescendants()) do
                         if target:IsA("Model") and target:FindFirstChild("Humanoid") and target ~= character then
@@ -1766,7 +2184,7 @@ local function initialize()
                                 local targetPos = targetHRP.Position
                                 local toTarget = (targetPos - rayOrigin).Unit
                                 local dot = toTarget:Dot(rayDirection.Unit)
-                                
+
                                 if dot > 0.7 then -- Цель находится примерно в направлении взгляда
                                     -- Стреляем через стены
                                     local fireFunction = tool:FindFirstChild("Fire") or tool:FindFirstChild("Shoot") or tool:FindFirstChild("Attack")
@@ -1787,7 +2205,7 @@ local function initialize()
             end
         end
     end)
-    
+
     autoShootButton.MouseButton1Click:Connect(function()
         autoShootEnabled = not autoShootEnabled
         autoShootButton.Text = "AUTO SHOOT: " .. (autoShootEnabled and "ON" or "OFF")
@@ -1810,13 +2228,13 @@ local function initialize()
                        mob:FindFirstChild("HumanoidRootPart") and
                        not game.Players:GetPlayerFromCharacter(mob) and
                        mob.Humanoid.Health > 0 then
-                        
+
                         local mobRoot = mob.HumanoidRootPart
                         local distance = (mobRoot.Position - rootPart.Position).Magnitude
-                        
+
                         if distance < 300 then -- Увеличенная дальность стрельбы
                             local mobHead = mob:FindFirstChild("Head") or mobRoot
-                            
+
                             -- Мгновенный поворот к цели
                             rootPart.CFrame = CFrame.new(rootPart.Position, mobHead.Position)
 
@@ -1827,7 +2245,7 @@ local function initialize()
                             else
                                 tool:Activate()
                             end
-                            
+
                             -- Непрерывная стрельба без задержки
                         end
                     end
