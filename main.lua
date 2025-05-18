@@ -778,61 +778,63 @@ local graphicsSettings = {
     ["ULTRA"] = function()
         local lighting = game:GetService("Lighting")
         lighting.GlobalShadows = true
-        lighting.ShadowSoftness = 1
+        lighting.ShadowSoftness = 0.8
         lighting.Technology = Enum.Technology.Future
         settings().Rendering.QualityLevel = 21
 
-        -- Set ultra sky
+        -- Set ultra realistic sky
         local sky = Instance.new("Sky")
         sky.Name = "CXNT_Sky"
-        sky.SkyboxBk = "rbxassetid://10707161936"
-        sky.SkyboxDn = "rbxassetid://10707161936"
-        sky.SkyboxFt = "rbxassetid://10707161936"
-        sky.SkyboxLf = "rbxassetid://10707161936"
-        sky.SkyboxRt = "rbxassetid://10707161936"
-        sky.SkyboxUp = "rbxassetid://10707161936"
+        sky.SkyboxBk = "rbxassetid://8107841671"
+        sky.SkyboxDn = "rbxassetid://8107841671"
+        sky.SkyboxFt = "rbxassetid://8107841671"
+        sky.SkyboxLf = "rbxassetid://8107841671"
+        sky.SkyboxRt = "rbxassetid://8107841671"
+        sky.SkyboxUp = "rbxassetid://8107841671"
+        sky.SunAngularSize = 21
+        sky.MoonAngularSize = 11
         sky.Parent = lighting
 
         -- Remove FPS cap
         setfpscap(9999999)
 
-        -- Enhanced Bloom
+        -- Refined Bloom
         local bloom = Instance.new("BloomEffect")
-        bloom.Intensity = 2
-        bloom.Size = 56
-        bloom.Threshold = 0.8
+        bloom.Intensity = 1.2
+        bloom.Size = 32
+        bloom.Threshold = 0.95
         bloom.Parent = lighting
 
         -- Enhanced Sun Rays
         local sunRays = Instance.new("SunRaysEffect")
-        sunRays.Intensity = 0.3
-        sunRays.Spread = 1.5
+        sunRays.Intensity = 0.25
+        sunRays.Spread = 0.85
         sunRays.Parent = lighting
 
         -- Advanced Color Correction
         local colorCorrection = Instance.new("ColorCorrectionEffect")
-        colorCorrection.Brightness = 0.15
-        colorCorrection.Contrast = 0.25
-        colorCorrection.Saturation = 0.35
-        colorCorrection.TintColor = Color3.fromRGB(255, 252, 245)
+        colorCorrection.Brightness = 0.05
+        colorCorrection.Contrast = 0.2
+        colorCorrection.Saturation = 0.25
+        colorCorrection.TintColor = Color3.fromRGB(255, 255, 250)
         colorCorrection.Parent = lighting
 
-        -- Depth of Field Effect
+        -- Subtle Depth of Field
         local depthOfField = Instance.new("DepthOfFieldEffect")
-        depthOfField.FarIntensity = 0.15
-        depthOfField.FocusDistance = 0.05
-        depthOfField.InFocusRadius = 30
-        depthOfField.NearIntensity = 0.75
+        depthOfField.FarIntensity = 0.1
+        depthOfField.FocusDistance = 0.1
+        depthOfField.InFocusRadius = 50
+        depthOfField.NearIntensity = 0.4
         depthOfField.Parent = lighting
 
-        -- Atmosphere Effect
+        -- Enhanced Atmosphere
         local atmosphere = Instance.new("Atmosphere")
-        atmosphere.Density = 0.35
-        atmosphere.Offset = 0.25
-        atmosphere.Color = Color3.fromRGB(199, 175, 166)
-        atmosphere.Decay = Color3.fromRGB(106, 112, 125)
-        atmosphere.Glare = 0.4
-        atmosphere.Haze = 1.5
+        atmosphere.Density = 0.25
+        atmosphere.Offset = 0.15
+        atmosphere.Color = Color3.fromRGB(206, 227, 255)
+        atmosphere.Decay = Color3.fromRGB(147, 178, 255)
+        atmosphere.Glare = 0.3
+        atmosphere.Haze = 0.9
         atmosphere.Parent = lighting
 
         -- HDR Effect
@@ -2663,6 +2665,227 @@ end)
     wallBangButton.Size = UDim2.new(0.4, -10, 0, 20)
     wallBangButton.Position = UDim2.new(0.6, 0, 0, 270)
     wallBangButton.Parent = frame
+
+    -- Auto Farm Button
+    local autoFarmButton = Instance.new("TextButton")
+    autoFarmButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    autoFarmButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    autoFarmButton.Font = Enum.Font.GothamSemibold
+    autoFarmButton.TextSize = 14
+    autoFarmButton.BorderSizePixel = 0
+    autoFarmButton.AutoButtonColor = true
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 6)
+    UICorner.Parent = autoFarmButton
+
+    local originalColor = autoFarmButton.BackgroundColor3
+    autoFarmButton.MouseEnter:Connect(function()
+        autoFarmButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    end)
+    autoFarmButton.MouseLeave:Connect(function()
+        autoFarmButton.BackgroundColor3 = originalColor
+    end)
+
+    autoFarmButton.Text = "AUTO FARM: OFF"
+    autoFarmButton.Size = UDim2.new(0.4, -10, 0, 20)
+    autoFarmButton.Position = UDim2.new(0.6, 0, 0, 390)
+    autoFarmButton.Parent = frame
+
+    -- Clone Button
+    local cloneButton = Instance.new("TextButton")
+    cloneButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    cloneButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    cloneButton.Font = Enum.Font.GothamSemibold
+    cloneButton.TextSize = 14
+    cloneButton.BorderSizePixel = 0
+    cloneButton.AutoButtonColor = true
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 6)
+    UICorner.Parent = cloneButton
+
+    local originalColor = cloneButton.BackgroundColor3
+    cloneButton.MouseEnter:Connect(function()
+        cloneButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    end)
+    cloneButton.MouseLeave:Connect(function()
+        cloneButton.BackgroundColor3 = originalColor
+    end)
+
+    cloneButton.Text = "CLONE ARMY: OFF"
+    cloneButton.Size = UDim2.new(0.4, -10, 0, 20)
+    cloneButton.Position = UDim2.new(0.6, 0, 0, 420)
+    cloneButton.Parent = frame
+
+    local clonesEnabled = false
+    local clones = {}
+
+    cloneButton.MouseButton1Click:Connect(function()
+        clonesEnabled = not clonesEnabled
+        cloneButton.Text = "CLONE ARMY: " .. (clonesEnabled and "ON" or "OFF")
+
+        if clonesEnabled then
+            local character = player.Character
+            if not character then return end
+
+            -- Remove existing clones
+            for _, clone in pairs(clones) do
+                if clone and clone.Parent then
+                    clone:Destroy()
+                end
+            end
+            clones = {}
+
+            -- Create 1000 clones
+            for i = 1, 1000 do
+                local clone = character:Clone()
+                clone.Name = "Clone_" .. i
+                
+                -- Remove scripts and sounds from clone
+                for _, item in pairs(clone:GetDescendants()) do
+                    if item:IsA("Script") or item:IsA("LocalScript") or item:IsA("Sound") then
+                        item:Destroy()
+                    end
+                end
+
+                -- Position clone in a spiral pattern around the player
+                local angle = i * 0.1
+                local radius = 5 + i * 0.1
+                local x = math.cos(angle) * radius
+                local z = math.sin(angle) * radius
+                
+                local rootPart = clone:FindFirstChild("HumanoidRootPart")
+                if rootPart then
+                    rootPart.CFrame = character.HumanoidRootPart.CFrame * CFrame.new(x, 0, z)
+                end
+
+                -- Make clones follow the player
+                local humanoid = clone:FindFirstChild("Humanoid")
+                if humanoid then
+                    humanoid.WalkSpeed = 16
+                    spawn(function()
+                        while clonesEnabled and clone and clone.Parent and character and character.Parent do
+                            if humanoid and character:FindFirstChild("HumanoidRootPart") then
+                                humanoid:MoveTo(character.HumanoidRootPart.Position + Vector3.new(x, 0, z))
+                            end
+                            wait(0.1)
+                        end
+                    end)
+                end
+
+                clone.Parent = workspace
+                table.insert(clones, clone)
+            end
+        else
+            -- Remove all clones
+            for _, clone in pairs(clones) do
+                if clone and clone.Parent then
+                    clone:Destroy()
+                end
+            end
+            clones = {}
+        end
+    end)
+
+    local autoFarmEnabled = false
+    local autoFarmConnection
+
+    autoFarmButton.MouseButton1Click:Connect(function()
+        autoFarmEnabled = not autoFarmEnabled
+        autoFarmButton.Text = "AUTO FARM: " .. (autoFarmEnabled and "ON" or "OFF")
+
+        if autoFarmEnabled then
+            -- Create notification UI
+            local notification = Instance.new("TextLabel")
+            notification.Size = UDim2.new(0, 200, 0, 50)
+            notification.Position = UDim2.new(1, -220, 0, 10)
+            notification.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+            notification.TextColor3 = Color3.fromRGB(255, 255, 255)
+            notification.Font = Enum.Font.GothamBold
+            notification.TextSize = 14
+            notification.TextWrapped = true
+            notification.BackgroundTransparency = 0.3
+            notification.Parent = frame
+
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, 6)
+            corner.Parent = notification
+
+            autoFarmConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                if not autoFarmEnabled then return end
+                
+                -- Try to find and modify common resource values
+                local resourceTypes = {
+                    "Money", "Coins", "Cash", "Points", "Gold", "Gems", "XP",
+                    "Experience", "Tokens", "Credits", "Resources", "Materials",
+                    "Energy", "Power", "Level", "Score", "Currency"
+                }
+
+                -- Update notification
+                notification.Text = "Auto Farming: +1,000,000 every minute"
+
+                -- Search for resources in common locations
+                local function addResources()
+                    -- Player stats/data
+                    if player:FindFirstChild("leaderstats") then
+                        for _, stat in pairs(player.leaderstats:GetChildren()) do
+                            if stat:IsA("IntValue") or stat:IsA("NumberValue") then
+                                stat.Value = stat.Value + 1000000
+                            end
+                        end
+                    end
+
+                    -- Check player's backpack/inventory
+                    for _, item in pairs(player.Backpack:GetChildren()) do
+                        for _, resourceName in pairs(resourceTypes) do
+                            local resource = item:FindFirstChild(resourceName)
+                            if resource and (resource:IsA("IntValue") or resource:IsA("NumberValue")) then
+                                resource.Value = resource.Value + 1000000
+                            end
+                        end
+                    end
+
+                    -- Check character
+                    if player.Character then
+                        for _, resourceName in pairs(resourceTypes) do
+                            local resource = player.Character:FindFirstChild(resourceName)
+                            if resource and (resource:IsA("IntValue") or resource:IsA("NumberValue")) then
+                                resource.Value = resource.Value + 1000000
+                            end
+                        end
+                    end
+
+                    -- Try to fire common remote events for resources
+                    local remoteEvents = {"AddMoney", "AddCoins", "AddResources", "CollectResource", "GainResource"}
+                    for _, eventName in pairs(remoteEvents) do
+                        local event = game:GetService("ReplicatedStorage"):FindFirstChild(eventName)
+                        if event and event:IsA("RemoteEvent") then
+                            event:FireServer(1000000)
+                        end
+                    end
+                end
+
+                -- Add resources every minute
+                spawn(function()
+                    while autoFarmEnabled do
+                        addResources()
+                        wait(60)
+                    end
+                end)
+            end)
+        else
+            if autoFarmConnection then
+                autoFarmConnection:Disconnect()
+            end
+            -- Remove notification if it exists
+            for _, child in pairs(frame:GetChildren()) do
+                if child:IsA("TextLabel") and child.Text:find("Auto Farming") then
+                    child:Destroy()
+                end
+            end
+        end
+    end)
 
     -- TROLLING Button
     local trollingButton = Instance.new("TextButton")
