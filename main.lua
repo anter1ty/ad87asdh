@@ -37,7 +37,7 @@ gui.Parent = game:GetService("CoreGui")
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0, 600, 0, 600)
 frame.Position = UDim2.new(0.5, -300, 0.5, -300)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 frame.BorderSizePixel = 0
 frame.Visible = false
 frame.Parent = gui
@@ -79,20 +79,40 @@ spawn(function()
     end
 end)
 
--- Watermark with time and image
+-- Watermark with gradient animation
 local watermark = Instance.new("TextLabel")
-watermark.Text = "CXNT V1"
+watermark.Text = "CXNT V2"
 watermark.Size = UDim2.new(0, 250, 0, 30)
 watermark.Position = UDim2.new(0, 10, 0, 0)
 watermark.BackgroundTransparency = 1
-watermark.TextColor3 = Color3.fromRGB(255, 255, 255)
-watermark.TextTransparency = 0.2
 watermark.Font = Enum.Font.GothamBold
 watermark.TextSize = 16
 watermark.TextXAlignment = Enum.TextXAlignment.Left
-watermark.TextStrokeTransparency = 0.5
+watermark.TextColor3 = Color3.fromRGB(255, 0, 0)  -- Set to red
+watermark.TextStrokeTransparency = 0
 watermark.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
 watermark.Parent = gui
+
+-- Gradient animation
+local gradientColors = {
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),    -- Red
+    ColorSequenceKeypoint.new(0.2, Color3.fromRGB(255, 165, 0)), -- Orange
+    ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 255, 0)), -- Yellow
+    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(0, 255, 0)),   -- Green
+    ColorSequenceKeypoint.new(0.8, Color3.fromRGB(0, 0, 255)),   -- Blue
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(128, 0, 128))    -- Purple
+}
+
+local uiGradient = Instance.new("UIGradient")
+uiGradient.Color = ColorSequence.new(gradientColors)
+uiGradient.Parent = watermark
+
+-- Animate gradient
+local gradientOffset = 0
+game:GetService("RunService").RenderStepped:Connect(function()
+    gradientOffset = (gradientOffset + 0.002) % 1
+    uiGradient.Offset = Vector2.new(gradientOffset, 0)
+end)
 
 -- Add clickable image under watermark
 local imageButton = Instance.new("ImageButton")
@@ -173,6 +193,79 @@ skyButton.Parent = frame
 
 local currentSkyStyle = "DEFAULT"
 local skyStyles = {
+    ["RAINY_PARADISE"] = function()
+        local lighting = game:GetService("Lighting")
+        local sky = Instance.new("Sky")
+        sky.Name = "CXNT_Sky"
+        sky.SkyboxBk = "rbxassetid://8107841671"
+        sky.SkyboxDn = "rbxassetid://8107841671"
+        sky.SkyboxFt = "rbxassetid://8107841671"
+        sky.SkyboxLf = "rbxassetid://8107841671"
+        sky.SkyboxRt = "rbxassetid://8107841671"
+        sky.SkyboxUp = "rbxassetid://8107841671"
+        sky.Parent = lighting
+
+        -- Configure lighting for rain effect
+        lighting.ClockTime = 7
+        lighting.Ambient = Color3.fromRGB(100, 100, 120)
+        lighting.FogEnd = 1000
+        lighting.FogStart = 0
+        lighting.FogColor = Color3.fromRGB(192, 192, 192)
+
+        -- Create rain particles
+        local rainPart = Instance.new("Part")
+        rainPart.Size = Vector3.new(1, 1, 1)
+        rainPart.Transparency = 1
+        rainPart.Anchored = true
+        rainPart.CanCollide = false
+        rainPart.Position = workspace.CurrentCamera.CFrame.Position + Vector3.new(0, 50, 0)
+        rainPart.Parent = workspace
+
+        local rain = Instance.new("ParticleEmitter")
+        rain.Rate = 700
+        rain.Speed = NumberRange.new(50, 70)
+        rain.Velocity = Vector3.new(2, -50, 0)
+        rain.Size = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.1),
+            NumberSequenceKeypoint.new(1, 0.1)
+        })
+        rain.Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.7),
+            NumberSequenceKeypoint.new(1, 0.7)
+        })
+        rain.Lifetime = NumberRange.new(1, 2)
+        rain.SpreadAngle = Vector2.new(15, 15)
+        rain.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+        rain.Color = ColorSequence.new(Color3.fromRGB(200, 200, 255))
+        rain.Parent = rainPart
+
+        -- Add thunder and rain sounds
+        local thunderSound = Instance.new("Sound")
+        thunderSound.SoundId = "rbxassetid://1255922107"
+        thunderSound.Volume = 0.5
+        thunderSound.Parent = workspace
+
+        local rainSound = Instance.new("Sound")
+        rainSound.SoundId = "rbxassetid://3381417815"
+        rainSound.Volume = 0.3
+        rainSound.Looped = true
+        rainSound.Parent = workspace
+        rainSound:Play()
+
+        -- Thunder effect
+        spawn(function()
+            while wait(math.random(10, 30)) do
+                if lighting:FindFirstChild("CXNT_Sky") then
+                    lighting.Ambient = Color3.fromRGB(200, 200, 220)
+                    thunderSound:Play()
+                    wait(0.1)
+                    lighting.Ambient = Color3.fromRGB(100, 100, 120)
+                else
+                    break
+                end
+            end
+        end)
+    end,
     ["DEFAULT"] = function()
         local lighting = game:GetService("Lighting")
         lighting.ClockTime = 14
@@ -322,6 +415,125 @@ local skyStyles = {
         sky.Parent = lighting
         lighting.ClockTime = 17.8
         lighting.Ambient = Color3.fromRGB(255, 150, 100)
+    end,
+
+    ["PINK_SKY"] = function()
+        local lighting = game:GetService("Lighting")
+        local sky = Instance.new("Sky")
+        sky.Name = "CXNT_Sky"
+        sky.SkyboxBk = "rbxassetid://8202961731"
+        sky.SkyboxDn = "rbxassetid://8202961731"
+        sky.SkyboxFt = "rbxassetid://8202961731"
+        sky.SkyboxLf = "rbxassetid://8202961731"
+        sky.SkyboxRt = "rbxassetid://8202961731"
+        sky.SkyboxUp = "rbxassetid://8202961731"
+        sky.Parent = lighting
+        lighting.ClockTime = 14
+        lighting.Ambient = Color3.fromRGB(255, 192, 203)
+    end,
+
+    ["NIGHT_SKY_GALAXY"] = function()
+        local lighting = game:GetService("Lighting")
+        local sky = Instance.new("Sky")
+        sky.Name = "CXNT_Sky"
+        sky.SkyboxBk = "rbxassetid://15983996673"
+        sky.SkyboxDn = "rbxassetid://15983996673"
+        sky.SkyboxFt = "rbxassetid://15983996673"
+        sky.SkyboxLf = "rbxassetid://15983996673"
+        sky.SkyboxRt = "rbxassetid://15983996673"
+        sky.SkyboxUp = "rbxassetid://15983996673"
+        sky.Parent = lighting
+        lighting.ClockTime = 0
+        lighting.Ambient = Color3.fromRGB(20, 20, 40)
+    end,
+
+    ["LUCID_DREAMS"] = function()
+        local lighting = game:GetService("Lighting")
+        local sky = Instance.new("Sky")
+        sky.Name = "CXNT_Sky"
+        sky.SkyboxBk = "rbxassetid://8508116305"
+        sky.SkyboxDn = "rbxassetid://8508116305"
+        sky.SkyboxFt = "rbxassetid://8508116305"
+        sky.SkyboxLf = "rbxassetid://8508116305"
+        sky.SkyboxRt = "rbxassetid://8508116305"
+        sky.SkyboxUp = "rbxassetid://8508116305"
+        sky.Parent = lighting
+        lighting.ClockTime = 14
+        lighting.Ambient = Color3.fromRGB(150, 120, 255)
+    end,
+
+    ["MEME"] = function()
+        local lighting = game:GetService("Lighting")
+        local sky = Instance.new("Sky")
+        sky.Name = "CXNT_Sky"
+        sky.SkyboxBk = "rbxassetid://8668486438"
+        sky.SkyboxDn = "rbxassetid://8668486438"
+        sky.SkyboxFt = "rbxassetid://8668486438"
+        sky.SkyboxLf = "rbxassetid://8668486438"
+        sky.SkyboxRt = "rbxassetid://8668486438"
+        sky.SkyboxUp = "rbxassetid://8668486438"
+        sky.Parent = lighting
+        lighting.ClockTime = 14
+        lighting.Ambient = Color3.fromRGB(255, 255, 255)
+    end,
+
+    ["REALISTIC_V2"] = function()
+        local lighting = game:GetService("Lighting")
+        local sky = Instance.new("Sky")
+        sky.Name = "CXNT_Sky"
+        sky.SkyboxBk = "rbxassetid://8790041926"
+        sky.SkyboxDn = "rbxassetid://8790041926"
+        sky.SkyboxFt = "rbxassetid://8790041926"
+        sky.SkyboxLf = "rbxassetid://8790041926"
+        sky.SkyboxRt = "rbxassetid://8790041926"
+        sky.SkyboxUp = "rbxassetid://8790041926"
+        sky.Parent = lighting
+        lighting.ClockTime = 14
+        lighting.Ambient = Color3.fromRGB(255, 255, 255)
+    end,
+
+    ["OPIUM"] = function()
+        local lighting = game:GetService("Lighting")
+        local sky = Instance.new("Sky")
+        sky.Name = "CXNT_Sky"
+        sky.SkyboxBk = "rbxassetid://8107841671"
+        sky.SkyboxDn = "rbxassetid://8107841671"
+        sky.SkyboxFt = "rbxassetid://8107841671"
+        sky.SkyboxLf = "rbxassetid://8107841671"
+        sky.SkyboxRt = "rbxassetid://8107841671"
+        sky.SkyboxUp = "rbxassetid://8107841671"
+        sky.Parent = lighting
+
+        lighting.ClockTime = 2
+        lighting.Ambient = Color3.fromRGB(128, 0, 128)
+        lighting.FogEnd = 500
+        lighting.FogStart = 0
+        lighting.FogColor = Color3.fromRGB(75, 0, 130)
+
+        -- Add purple haze effect
+        local atmosphere = Instance.new("Atmosphere")
+        atmosphere.Density = 0.3
+        atmosphere.Offset = 0.25
+        atmosphere.Color = Color3.fromRGB(128, 0, 128)
+        atmosphere.Decay = Color3.fromRGB(106, 0, 106)
+        atmosphere.Glare = 0.3
+        atmosphere.Haze = 2
+        atmosphere.Parent = lighting
+
+        -- Add bloom effect
+        local bloom = Instance.new("BloomEffect")
+        bloom.Intensity = 1
+        bloom.Size = 24
+        bloom.Threshold = 0.5
+        bloom.Parent = lighting
+
+        -- Add color correction
+        local colorCorrection = Instance.new("ColorCorrectionEffect")
+        colorCorrection.Brightness = 0.05
+        colorCorrection.Contrast = 0.15
+        colorCorrection.Saturation = 0.25
+        colorCorrection.TintColor = Color3.fromRGB(200, 150, 255)
+        colorCorrection.Parent = lighting
     end,
     ["PURPLE_NEBULA"] = function()
         local lighting = game:GetService("Lighting")
@@ -499,6 +711,214 @@ godModeButton.Size = UDim2.new(0.4, -10, 0, 20)
 godModeButton.Position = UDim2.new(0, 10, 0, 180)
 godModeButton.Parent = frame
 
+-- Graphics Quality Button
+local graphicsButton = Instance.new("TextButton")
+graphicsButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+graphicsButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+graphicsButton.Font = Enum.Font.GothamSemibold
+graphicsButton.TextSize = 14
+graphicsButton.BorderSizePixel = 0
+graphicsButton.AutoButtonColor = true
+
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.Parent = graphicsButton
+
+-- Add hover effect
+local originalColor = graphicsButton.BackgroundColor3
+graphicsButton.MouseEnter:Connect(function()
+    graphicsButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+end)
+graphicsButton.MouseLeave:Connect(function()
+    graphicsButton.BackgroundColor3 = originalColor
+end)
+
+graphicsButton.Text = "GRAPHICS: NORMAL"
+graphicsButton.Size = UDim2.new(0.4, -10, 0, 20)
+graphicsButton.Position = UDim2.new(0.6, 0, 0, 330)
+graphicsButton.Parent = frame
+
+local currentGraphics = "NORMAL"
+local graphicsSettings = {
+    ["POTATO"] = function()
+        local lighting = game:GetService("Lighting")
+        lighting.GlobalShadows = false
+        lighting.ShadowSoftness = 0
+        lighting.Technology = Enum.Technology.Compatibility
+        settings().Rendering.QualityLevel = 1
+
+        -- Remove all post effects
+        for _, effect in pairs(lighting:GetChildren()) do
+            if effect:IsA("PostEffect") then
+                effect:Destroy()
+            end
+        end
+
+        -- Set low quality terrain
+        workspace.Terrain.WaterWaveSize = 0
+        workspace.Terrain.WaterWaveSpeed = 0
+        workspace.Terrain.WaterReflectance = 0
+        workspace.Terrain.WaterTransparency = 0
+    end,
+
+    ["NORMAL"] = function()
+        local lighting = game:GetService("Lighting")
+        lighting.GlobalShadows = true
+        lighting.ShadowSoftness = 0.5
+        lighting.Technology = Enum.Technology.Future
+        settings().Rendering.QualityLevel = 4
+
+        workspace.Terrain.WaterWaveSize = 0.15
+        workspace.Terrain.WaterWaveSpeed = 10
+        workspace.Terrain.WaterReflectance = 0.05
+        workspace.Terrain.WaterTransparency = 0.5
+    end,
+
+    ["ULTRA"] = function()
+        local lighting = game:GetService("Lighting")
+        lighting.GlobalShadows = true
+        lighting.ShadowSoftness = 1
+        lighting.Technology = Enum.Technology.Future
+        settings().Rendering.QualityLevel = 21
+
+        -- Set ultra sky
+        local sky = Instance.new("Sky")
+        sky.Name = "CXNT_Sky"
+        sky.SkyboxBk = "rbxassetid://10707161936"
+        sky.SkyboxDn = "rbxassetid://10707161936"
+        sky.SkyboxFt = "rbxassetid://10707161936"
+        sky.SkyboxLf = "rbxassetid://10707161936"
+        sky.SkyboxRt = "rbxassetid://10707161936"
+        sky.SkyboxUp = "rbxassetid://10707161936"
+        sky.Parent = lighting
+
+        -- Remove FPS cap
+        setfpscap(9999999)
+
+        -- Enhanced Bloom
+        local bloom = Instance.new("BloomEffect")
+        bloom.Intensity = 2
+        bloom.Size = 56
+        bloom.Threshold = 0.8
+        bloom.Parent = lighting
+
+        -- Enhanced Sun Rays
+        local sunRays = Instance.new("SunRaysEffect")
+        sunRays.Intensity = 0.3
+        sunRays.Spread = 1.5
+        sunRays.Parent = lighting
+
+        -- Advanced Color Correction
+        local colorCorrection = Instance.new("ColorCorrectionEffect")
+        colorCorrection.Brightness = 0.15
+        colorCorrection.Contrast = 0.25
+        colorCorrection.Saturation = 0.35
+        colorCorrection.TintColor = Color3.fromRGB(255, 252, 245)
+        colorCorrection.Parent = lighting
+
+        -- Depth of Field Effect
+        local depthOfField = Instance.new("DepthOfFieldEffect")
+        depthOfField.FarIntensity = 0.15
+        depthOfField.FocusDistance = 0.05
+        depthOfField.InFocusRadius = 30
+        depthOfField.NearIntensity = 0.75
+        depthOfField.Parent = lighting
+
+        -- Atmosphere Effect
+        local atmosphere = Instance.new("Atmosphere")
+        atmosphere.Density = 0.35
+        atmosphere.Offset = 0.25
+        atmosphere.Color = Color3.fromRGB(199, 175, 166)
+        atmosphere.Decay = Color3.fromRGB(106, 112, 125)
+        atmosphere.Glare = 0.4
+        atmosphere.Haze = 1.5
+        atmosphere.Parent = lighting
+
+        -- HDR Effect
+        local hdr = Instance.new("ColorCorrectionEffect")
+        hdr.Name = "HDR"
+        hdr.Brightness = 0.03
+        hdr.Contrast = 0.05
+        hdr.Saturation = 0.1
+        hdr.TintColor = Color3.fromRGB(255, 250, 245)
+        hdr.Parent = lighting
+
+        -- Lens Distortion
+        local lensDistortion = Instance.new("BloomEffect")
+        lensDistortion.Name = "LensDistortion"
+        lensDistortion.Intensity = 0.5
+        lensDistortion.Size = 12
+        lensDistortion.Threshold = 0.95
+        lensDistortion.Parent = lighting
+
+        -- Enhanced Water Effects
+        workspace.Terrain.WaterWaveSize = 0.15
+        workspace.Terrain.WaterWaveSpeed = 35
+        workspace.Terrain.WaterReflectance = 1
+        workspace.Terrain.WaterTransparency = 0.65
+
+        -- Dynamic Reflections
+        local reflectionSettings = {
+            ["ReflectionIntensity"] = 1,
+            ["BlurAmount"] = 0.5,
+            ["FresnelTerm"] = 0.25
+        }
+
+        -- Add Particles for Enhanced Atmosphere
+        local function createAtmosphericParticles(position)
+            local particles = Instance.new("ParticleEmitter")
+            particles.Rate = 5
+            particles.Speed = NumberRange.new(0.1, 0.5)
+            particles.Lifetime = NumberRange.new(2, 4)
+            particles.Size = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 0.1),
+                NumberSequenceKeypoint.new(0.5, 0.2),
+                NumberSequenceKeypoint.new(1, 0.1)
+            })
+            particles.Transparency = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 1),
+                NumberSequenceKeypoint.new(0.2, 0.8),
+                NumberSequenceKeypoint.new(0.8, 0.8),
+                NumberSequenceKeypoint.new(1, 1)
+            })
+            particles.Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+            })
+            particles.Parent = position
+        end
+
+        -- Add atmospheric particles to the environment
+        local atmosphereAnchors = {}
+        for i = 1, 10 do
+            local anchor = Instance.new("Part")
+            anchor.Anchored = true
+            anchor.CanCollide = false
+            anchor.Transparency = 1
+            anchor.Position = Vector3.new(
+                math.random(-100, 100),
+                math.random(20, 50),
+                math.random(-100, 100)
+            )
+            anchor.Parent = workspace
+            createAtmosphericParticles(anchor)
+            table.insert(atmosphereAnchors, anchor)
+        end
+
+        -- Clean up previous particles after 5 seconds
+        game:GetService("Debris"):AddItem(atmosphereAnchors[1].Parent, 5)
+    end
+}
+
+graphicsButton.MouseButton1Click:Connect(function()
+    local qualities = {"POTATO", "NORMAL", "ULTRA"}
+    local currentIndex = table.find(qualities, currentGraphics)
+    currentGraphics = qualities[currentIndex % #qualities + 1]
+    graphicsButton.Text = "GRAPHICS: " .. currentGraphics
+    graphicsSettings[currentGraphics]()
+end)
+
 local skyButton = Instance.new("TextButton")
 skyButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 skyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -645,7 +1065,7 @@ local function toggleItemEsp()
                (item.Name:lower():find("item") or 
                 item.Name:lower():find("pickup") or 
                 item.Name:lower():find("tool") or
-                item.Name:lower():find("weapon") or
+                item.Name:lower():find("weapon") or 
                 item.Name:lower():find("gun") or
                 item.Name:lower():find("sword") or
                 item.Name:lower():find("knife") or
@@ -1370,7 +1790,7 @@ local function initialize()
 
     -- Click Teleport button
     local teleportButton = Instance.new("TextButton")
-    teleportButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+teleportButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 teleportButton.Font = Enum.Font.GothamSemibold
 teleportButton.TextSize = 14
@@ -1458,33 +1878,44 @@ end)
             local root = char:FindFirstChild("HumanoidRootPart")
 
             if humanoid and root then
+                root.Anchored = true
+
                 flyConnection = game:GetService("RunService").RenderStepped:Connect(function()
                     local camera = workspace.CurrentCamera
                     local lookVector = camera.CFrame.LookVector
                     local rightVector = camera.CFrame.RightVector
 
                     local moveDirection = Vector3.new(0, 0, 0)
+                    local moved = false
 
                     if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then
                         moveDirection = moveDirection + lookVector
+                        moved = true
                     end
                     if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then
                         moveDirection = moveDirection - lookVector
+                        moved = true
                     end
                     if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then
                         moveDirection = moveDirection + rightVector
+                        moved = true
                     end
                     if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then
                         moveDirection = moveDirection - rightVector
+                        moved = true
                     end
                     if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then
                         moveDirection = moveDirection + Vector3.new(0, 1, 0)
+                        moved = true
                     end
                     if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftShift) then
                         moveDirection = moveDirection - Vector3.new(0, 1, 0)
+                        moved = true
                     end
 
-                    root.Velocity = moveDirection.Unit * flySpeed
+                    if moved then
+                        root.CFrame = root.CFrame + moveDirection.Unit * (flySpeed * 0.1)
+                    end
                 end)
 
                 humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
@@ -1492,9 +1923,15 @@ end)
         else
             if flyConnection then
                 flyConnection:Disconnect()
+                flyConnection = nil
                 local humanoid = player.Character:FindFirstChild("Humanoid")
+                local root = player.Character:FindFirstChild("HumanoidRootPart")
                 if humanoid then
                     humanoid:ChangeState(Enum.HumanoidStateType.Landing)
+                end
+                if root then
+                    root.Anchored = false
+                    root.Velocity = Vector3.new(0, 0, 0)
                 end
             end
         end
@@ -1788,6 +2225,80 @@ end)
     ammoHackButton.Size = UDim2.new(0.4, -10, 0, 20)
     ammoHackButton.Position = UDim2.new(0.6, 0, 0, 240)
     ammoHackButton.Parent = frame
+    
+    -- Animation Button
+    local animationButton = Instance.new("TextButton")
+    animationButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    animationButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    animationButton.Font = Enum.Font.GothamSemibold
+    animationButton.TextSize = 14
+    animationButton.BorderSizePixel = 0
+    animationButton.AutoButtonColor = true
+
+    -- Add rounded corners
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 6)
+    UICorner.Parent = animationButton
+
+    -- Add hover effect
+    local originalColor = animationButton.BackgroundColor3
+    animationButton.MouseEnter:Connect(function()
+        animationButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    end)
+    animationButton.MouseLeave:Connect(function()
+        animationButton.BackgroundColor3 = originalColor
+    end)
+    animationButton.Text = "ANIMATION: NONE"
+    animationButton.Size = UDim2.new(0.4, -10, 0, 20)
+    animationButton.Position = UDim2.new(0.6, 0, 0, 360)
+    animationButton.Parent = frame
+
+    local animations = {
+        {name = "Arm Turbine", id = "rbxassetid://259438880"},
+        {name = "Moon Dance", id = "rbxassetid://27789359"},
+        {name = "Insane", id = "rbxassetid://33796059"},
+        {name = "Party Time", id = "rbxassetid://33796059"},
+        {name = "Zombie Arms", id = "rbxassetid://183294396"},
+        {name = "Laugh", id = "rbxassetid://129423131"},
+        {name = "Charleston", id = "rbxassetid://429703734"},
+        {name = "Cry", id = "rbxassetid://180612465"},
+        {name = "Weird Float", id = "rbxassetid://248336459"},
+        {name = "Spin", id = "rbxassetid://188632011"},
+        {name = "Gangnam Style", id = "rbxassetid://429730430"},
+        {name = "Rotation", id = "rbxassetid://136801964"},
+    }
+
+    local currentAnimation = nil
+    local currentAnimIndex = 0
+    local animationTrack = nil
+
+    animationButton.MouseButton1Click:Connect(function()
+        if animationTrack then
+            animationTrack:Stop()
+            animationTrack = nil
+        end
+
+        currentAnimIndex = (currentAnimIndex % #animations) + 1
+        local anim = animations[currentAnimIndex]
+        
+        local character = player.Character
+        if character and character:FindFirstChild("Humanoid") then
+            local animation = Instance.new("Animation")
+            animation.AnimationId = anim.id
+            animationTrack = character.Humanoid:LoadAnimation(animation)
+            animationTrack:Play()
+            animationButton.Text = "ANIMATION: " .. anim.name
+        end
+    end)
+
+    -- Stop animation when character dies or respawns
+    player.CharacterAdded:Connect(function()
+        if animationTrack then
+            animationTrack:Stop()
+            animationTrack = nil
+        end
+        animationButton.Text = "ANIMATION: NONE"
+    end)
 
     local ammoHackEnabled = false
     local ammoHackConnection
@@ -1951,13 +2462,29 @@ end)
                 local myCharacter = player.Character
                 if not myCharacter or not myCharacter:FindFirstChild("HumanoidRootPart") then return end
 
+                local myHead = myCharacter:FindFirstChild("Head")
+                if not myHead then return end
+
                 for _, otherPlayer in pairs(game.Players:GetPlayers()) do
-                    if otherPlayer ~= player and otherPlayer and otherPlayer.Character and 
+                    if otherPlayer ~= player and otherPlayer.Character and 
                        otherPlayer.Character:FindFirstChild("HumanoidRootPart") and
                        otherPlayer.Character:FindFirstChild("Humanoid") and
+                       otherPlayer.Character:FindFirstChild("Head") and
                        otherPlayer.Character.Humanoid.Health > 0 then
 
-                        local distance = (otherPlayer.Character.HumanoidRootPart.Position - myCharacter.HumanoidRootPart.Position).Magnitude
+                        local otherHead = otherPlayer.Character.Head
+                        local distance = (otherHead.Position - myHead.Position).Magnitude
+
+                        -- Проверяем видимость игрока (нет ли стен между нами)
+                        local ray = Ray.new(myHead.Position, (otherHead.Position - myHead.Position))
+                        local hit, hitPos = workspace:FindPartOnRayWithIgnoreList(ray, {myCharacter, otherPlayer.Character})
+
+                        -- Если луч не встретил препятствий или попал прямо в игрока
+                        if not hit or (hit and hit:IsDescendantOf(otherPlayer.Character)) then
+                            -- Приоритет видимым игрокам - уменьшаем дистанцию
+                            distance = distance * 0.5
+                        end
+
                         if distance < nearestDistance then
                             nearestDistance = distance
                             nearestPlayer = otherPlayer
@@ -2094,7 +2621,7 @@ end)
 
     -- Sky customization
     skyButton.MouseButton1Click:Connect(function()
-        local styles = {"DEFAULT", "DARK_RED_MOON", "BLUE_SKY", "GOLDEN_HOUR", "DRAIN", "BRIGHT", "NIGHT_STARS", "SUNSET", "ANIME_SKY", "PURPLE_NEBULA", "VAPORWAVE", "SPACE", "EMERALD_SKY", "SUNSET_PARADISE"}
+        local styles = {"RAINY_PARADISE", "DEFAULT", "DARK_RED_MOON", "BLUE_SKY", "GOLDEN_HOUR", "DRAIN", "BRIGHT", "NIGHT_STARS", "SUNSET", "ANIME_SKY", "PURPLE_NEBULA", "VAPORWAVE", "SPACE", "EMERALD_SKY", "SUNSET_PARADISE", "OPIUM", "MEME", "REALISTIC_V2"}
         local currentIndex = table.find(styles, currentSkyStyle)
         currentSkyStyle = styles[currentIndex % #styles + 1]
         skyButton.Text = "SKY: " .. currentSkyStyle
@@ -2136,6 +2663,183 @@ end)
     wallBangButton.Size = UDim2.new(0.4, -10, 0, 20)
     wallBangButton.Position = UDim2.new(0.6, 0, 0, 270)
     wallBangButton.Parent = frame
+
+    -- TROLLING Button
+    local trollingButton = Instance.new("TextButton")
+    trollingButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    trollingButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    trollingButton.Font = Enum.Font.GothamSemibold
+    trollingButton.TextSize = 14
+    trollingButton.BorderSizePixel = 0
+    trollingButton.AutoButtonColor = true
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 6)
+    UICorner.Parent = trollingButton
+
+    local originalColor = trollingButton.BackgroundColor3
+    trollingButton.MouseEnter:Connect(function()
+        trollingButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    end)
+    trollingButton.MouseLeave:Connect(function()
+        trollingButton.BackgroundColor3 = originalColor
+    end)
+
+    trollingButton.Text = "TROLLING: OFF"
+    trollingButton.Size = UDim2.new(0.4, -10, 0, 20)
+    trollingButton.Position = UDim2.new(0.6, 0, 0, 300)
+    trollingButton.Parent = frame
+
+    local trollingEnabled = false
+    local trollingConnection
+    local animationTrack
+
+    trollingButton.MouseButton1Click:Connect(function()
+        trollingEnabled = not trollingEnabled
+        trollingButton.Text = "TROLLING: " .. (trollingEnabled and "ON" or "OFF")
+
+        local character = player.Character
+        if not character then return end
+
+        if trollingEnabled then
+            -- Change character model to female
+            local function createFemaleCharacter()
+                -- Base body parts
+                local torso = character:FindFirstChild("Torso")
+                if torso then
+                    torso.Size = Vector3.new(2, 2, 1)
+                    torso.Color = Color3.fromRGB(255, 226, 205)
+                end
+
+                local head = character:FindFirstChild("Head")
+                if head then
+                    head.Size = Vector3.new(1.2, 1.2, 1.2)
+                    head.Color = Color3.fromRGB(255, 226, 205)
+                end
+
+                -- Limbs
+                local limbs = {
+                    ["Left Arm"] = Vector3.new(0.8, 2, 0.8),
+                    ["Right Arm"] = Vector3.new(0.8, 2, 0.8),
+                    ["Left Leg"] = Vector3.new(0.9, 2, 0.9),
+                    ["Right Leg"] = Vector3.new(0.9, 2, 0.9)
+                }
+
+                for limbName, size in pairs(limbs) do
+                    local limb = character:FindFirstChild(limbName)
+                    if limb then
+                        limb.Size = size
+                        limb.Color = Color3.fromRGB(255, 226, 205)
+                    end
+                end
+
+                -- Add hair
+                local hair = Instance.new("Part")
+                hair.Name = "Hair"
+                hair.Size = Vector3.new(1.3, 1.5, 1.3)
+                hair.Color = Color3.fromRGB(218, 154, 48)
+                hair.CanCollide = false
+
+                local weld = Instance.new("Weld")
+                weld.Part0 = head
+                weld.Part1 = hair
+                weld.C0 = CFrame.new(0, 0.7, 0)
+                weld.Parent = hair
+                hair.Parent = character
+            end
+
+            createFemaleCharacter()
+
+            -- Create and play music
+            local sound = Instance.new("Sound")
+            sound.SoundId = "rbxassetid://6823597327"
+            sound.Volume = 0.8
+            sound.Looped = true
+            sound.Parent = character.HumanoidRootPart
+            sound:Play()
+
+            local animation = Instance.new("Animation")
+            animation.AnimationId = "rbxassetid://3333499508" -- Fun dance animation
+
+            local humanoid = character:FindFirstChild("Humanoid")
+            if humanoid then
+                local animator = humanoid:FindFirstChild("Animator") or Instance.new("Animator")
+                animator.Parent = humanoid
+
+                animationTrack = animator:LoadAnimation(animation)
+                animationTrack:Play()
+                animationTrack:AdjustSpeed(1.2) -- Dance speed
+                animationTrack.Looped = true -- Make the dance loop
+
+                -- Add screen effects
+                local screenGui = Instance.new("ScreenGui")
+                screenGui.Name = "TrollingEffects"
+                screenGui.Parent = player.PlayerGui
+
+                local redFlash = Instance.new("Frame")
+                redFlash.Size = UDim2.new(1, 0, 1, 0)
+                redFlash.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+                redFlash.BackgroundTransparency = 0.7
+                redFlash.Parent = screenGui
+
+                trollingConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                    if character:FindFirstChild("HumanoidRootPart") then
+                        local root = character.HumanoidRootPart
+
+                        -- Screen shake effect
+                        local camera = workspace.CurrentCamera
+                        local intensity = 1.5
+                        camera.CFrame = camera.CFrame * CFrame.new(
+                            math.random(-intensity, intensity) * 0.1,
+                            math.random(-intensity, intensity) * 0.1,
+                            math.random(-intensity, intensity) * 0.1
+                        )
+
+                        -- Red flash pulsing
+                        redFlash.BackgroundTransparency = 0.7 + math.sin(tick() * 5) * 0.2
+
+                        -- Particle effects
+                        local particle = Instance.new("ParticleEmitter")
+                        particle.Texture = "rbxasset://textures/particles/fire_main.dds"
+                        particle.Color = ColorSequence.new({
+                            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+                            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 100, 0)),
+                            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+                        })
+                        particle.Rate = 50
+                        particle.Speed = NumberRange.new(5, 8)
+                        particle.Lifetime = NumberRange.new(0.5, 1)
+                        particle.SpreadAngle = Vector2.new(-180, 180)
+                        particle.Parent = root
+                        game:GetService("Debris"):AddItem(particle, 0.1)
+                    end
+                end)
+            end
+        else
+            if trollingConnection then
+                trollingConnection:Disconnect()
+            end
+            if animationTrack then
+                animationTrack:Stop()
+            end
+            -- Stop and remove music
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                local sound = character.HumanoidRootPart:FindFirstChild("Sound")
+                if sound then
+                    sound:Stop()
+                    sound:Destroy()
+                end
+            end
+            -- Remove screen effects
+            if player.PlayerGui:FindFirstChild("TrollingEffects") then
+                player.PlayerGui.TrollingEffects:Destroy()
+            end
+            -- Reset camera
+            if workspace.CurrentCamera then
+                workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position)
+            end
+        end
+    end)
 
     local wallBangEnabled = false
     local wallBangConnection
