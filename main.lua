@@ -2202,7 +2202,318 @@ end)
     autoShootButton.Parent = frame
 
     -- Ammo Hack Button
-    local ammoHackButton = Instance.new("TextButton")
+    -- AI Control Button
+local aiControlButton = Instance.new("TextButton")
+aiControlButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+aiControlButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+aiControlButton.Font = Enum.Font.GothamSemibold
+aiControlButton.TextSize = 14
+aiControlButton.BorderSizePixel = 0
+aiControlButton.AutoButtonColor = true
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.Parent = aiControlButton
+
+local originalColor = aiControlButton.BackgroundColor3
+aiControlButton.MouseEnter:Connect(function()
+    aiControlButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+end)
+aiControlButton.MouseLeave:Connect(function()
+    aiControlButton.BackgroundColor3 = originalColor
+end)
+
+aiControlButton.Text = "AI CONTROL: OFF"
+aiControlButton.Size = UDim2.new(0.4, -10, 0, 20)
+aiControlButton.Position = UDim2.new(0.6, 0, 0, 450)
+aiControlButton.Parent = frame
+
+local aiEnabled = false
+local aiMemory = {}
+local lastPosition = nil
+local lastHealth = 100
+local learningRate = 0.1
+local updateInterval = 0.1 -- Reduce update frequency for better performance
+local lastUpdate = 0
+local cachedEnemies = {}
+local lastCacheUpdate = 0
+local cacheUpdateInterval = 1 -- Update enemy cache every second
+local experiencePoints = 0
+local aiLevel = 1
+local nextLevelExp = 100
+
+-- Cached workspace
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+
+-- AI Stats that improve with learning
+local aiStats = {
+    attackDamage = 10,
+    defenseBonus = 0,
+    criticalChance = 5,
+    dodgeChance = 5,
+    experienceMultiplier = 1,
+    healthRegen = 1
+}
+
+local function updateAIStats()
+    aiStats.attackDamage = 10 + (aiLevel * 2)
+    aiStats.defenseBonus = aiLevel
+    aiStats.criticalChance = 5 + (aiLevel * 0.5)
+    aiStats.dodgeChance = 5 + (aiLevel * 0.5)
+    aiStats.experienceMultiplier = 1 + (aiLevel * 0.1)
+    aiStats.healthRegen = 1 + (aiLevel * 0.2)
+end
+
+local function gainExperience(amount)
+    experiencePoints = experiencePoints + (amount * aiStats.experienceMultiplier)
+    if experiencePoints >= nextLevelExp then
+        aiLevel = aiLevel + 1
+        experiencePoints = experiencePoints - nextLevelExp
+        nextLevelExp = nextLevelExp * 1.5
+        updateAIStats()
+        
+        -- Visual feedback for level up
+        local levelUpText = Instance.new("TextLabel")
+        levelUpText.Text = "AI Level Up! Level " .. aiLevel
+        levelUpText.Size = UDim2.new(0, 200, 0, 50)
+        levelUpText.Position = UDim2.new(0.5, -100, 0.3, 0)
+        levelUpText.BackgroundTransparency = 1
+        levelUpText.TextColor3 = Color3.new(1, 1, 0)
+        levelUpText.TextStrokeTransparency = 0
+        levelUpText.Font = Enum.Font.GothamBold
+        levelUpText.TextSize = 24
+        levelUpText.Parent = game.Players.LocalPlayer.PlayerGui
+        
+        game:GetService("Debris"):AddItem(levelUpText, 2)
+    end
+end
+
+local function getClosestEnemy()
+    local currentTime = tick()
+    
+    -- Update cache if needed
+    if currentTime - lastCacheUpdate > cacheUpdateInterval then
+        cachedEnemies = {}
+        local character = player.Character
+        if not character then return nil end
+        
+        -- Use spatial hashing for more efficient enemy detection
+        local characterPos = character.PrimaryPart.Position
+        local searchRadius = 100
+        
+        for _, obj in ipairs(Workspace:GetPartBoundsInRadius(characterPos, searchRadius)) do
+            local model = obj:FindFirstAncestorWhichIsA("Model")
+            if model and model:FindFirstChild("Humanoid") and 
+               model:FindFirstChild("HumanoidRootPart") and
+               model ~= character and
+               model.Humanoid.Health > 0 then
+                table.insert(cachedEnemies, model)
+            end
+        end
+        
+        lastCacheUpdate = currentTime
+    end
+    
+    -- Find closest enemy from cache
+    local closest = nil
+    local minDistance = math.huge
+    local character = player.Character
+    if not character then return nil end
+    
+    for _, enemy in ipairs(cachedEnemies) do
+        if enemy.Parent and enemy.Humanoid.Health > 0 then
+            local distance = (enemy.HumanoidRootPart.Position - character.PrimaryPart.Position).Magnitude
+            if distance < minDistance then
+                minDistance = distance
+                closest = enemy
+            end
+        end
+    end
+    
+    return closest
+end
+
+local function collectNearbyItems()
+    local character = player.Character
+    if not character then return end
+    
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    if not rootPart then return end
+    
+    for _, item in pairs(workspace:GetDescendants()) do
+        if item:IsA("BasePart") and 
+           (item.Name:lower():find("item") or 
+            item.Name:lower():find("pickup") or 
+            item.Name:lower():find("weapon") or 
+            item.Name:lower():find("heal")) then
+            
+            local distance = (item.Position - rootPart.Position).Magnitude
+            if distance < 20 then
+                item.CFrame = rootPart.CFrame
+            end
+        end
+    end
+end
+
+local function updateAIMemory(action, reward)
+    table.insert(aiMemory, {
+        action = action,
+        reward = reward
+    })
+    if #aiMemory > 1000 then
+        table.remove(aiMemory, 1)
+    end
+end
+
+local function getBestAction()
+    if #aiMemory == 0 then return "explore" end
+    
+    local actionScores = {}
+    for _, memory in pairs(aiMemory) do
+        actionScores[memory.action] = (actionScores[memory.action] or 0) + memory.reward
+    end
+    
+    local bestAction = "explore"
+    local bestScore = -math.huge
+    for action, score in pairs(actionScores) do
+        if score > bestScore then
+            bestScore = score
+            bestAction = action
+        end
+    end
+    
+    return bestAction
+end
+
+aiControlButton.MouseButton1Click:Connect(function()
+    aiEnabled = not aiEnabled
+    aiControlButton.Text = "AI CONTROL: " .. (aiEnabled and "ON" .. " (Level " .. aiLevel .. ")" or "OFF")
+    
+    if aiEnabled then
+        -- Main AI loop
+        spawn(function()
+            while aiEnabled do
+                local currentTime = tick()
+                if currentTime - lastUpdate < updateInterval then
+                    RunService.Heartbeat:Wait()
+                    continue
+                end
+                lastUpdate = currentTime
+                
+                local character = player.Character
+                if character then
+                    local humanoid = character:FindFirstChild("Humanoid")
+                    local rootPart = character:FindFirstChild("HumanoidRootPart")
+                    
+                    if humanoid and rootPart then
+                        local currentHealth = humanoid.Health
+                        local currentPos = rootPart.Position
+                        
+                        -- Apply learned improvements
+                        if currentHealth < humanoid.MaxHealth then
+                            humanoid.Health = math.min(humanoid.MaxHealth, currentHealth + aiStats.healthRegen)
+                        end
+                        
+                        -- Calculate reward and learn from experience
+                        if lastPosition and lastHealth then
+                            local reward = 0
+                            reward = reward + (currentHealth - lastHealth) * 2
+                            reward = reward + (currentPos - lastPosition).Magnitude * 0.1
+                            
+                            -- Additional rewards for successful actions
+                            if currentHealth > lastHealth then
+                                reward = reward + 5 -- Healing reward
+                                gainExperience(10)
+                            end
+                            if lastHealth > currentHealth then
+                                reward = reward - 2 -- Penalty for taking damage
+                            end
+                        end
+                        
+                        -- Strategic decision making
+                        local enemy = getClosestEnemy()
+                        if enemy then
+                            local enemyDistance = (enemy.HumanoidRootPart.Position - rootPart.Position).Magnitude
+                            local enemyHealth = enemy.Humanoid.Health
+                            
+                            -- Calculate threat level
+                            local threatLevel = (enemyHealth / enemy.Humanoid.MaxHealth) * (100 / enemyDistance)
+                            
+                            if currentHealth < 50 or threatLevel > 1.5 then
+                                -- Strategic retreat and healing
+                                local safeSpots = {}
+                                for _, part in ipairs(Workspace:GetPartBoundsInRadius(rootPart.Position, 100)) do
+                                    if part.CanCollide and part.Position.Y > rootPart.Position.Y then
+                                        table.insert(safeSpots, part)
+                                    end
+                                end
+                                
+                                local safeSpot = safeSpots[math.random(1, #safeSpots)] or rootPart
+                                local retreatPos = safeSpot.Position + Vector3.new(0, 5, 0)
+                                
+                                humanoid:MoveTo(retreatPos)
+                                updateAIMemory("strategic_retreat", 15)
+                                gainExperience(5)
+                            else
+                                -- Tactical combat
+                                local tool = character:FindFirstChildOfClass("Tool")
+                                if tool then
+                                    -- Calculate optimal attack position
+                                    local attackPos = enemy.HumanoidRootPart.Position + 
+                                        (rootPart.Position - enemy.HumanoidRootPart.Position).Unit * 8
+                                    
+                                    -- Execute attack with learned improvements
+                                    if math.random(1, 100) <= aiStats.criticalChance then
+                                        -- Critical hit
+                                        tool:Activate()
+                                        gainExperience(20)
+                                        updateAIMemory("critical_strike", 25)
+                                    else
+                                        tool:Activate()
+                                        gainExperience(10)
+                                        updateAIMemory("attack", 10)
+                                    end
+                                    
+                                    humanoid:MoveTo(attackPos)
+                                end
+                            end
+                        else
+                            -- Intelligent exploration
+                            local explorationRadius = 50 + aiLevel * 2
+                            local points = {}
+                            
+                            -- Find strategic points
+                            for _, part in ipairs(Workspace:GetPartBoundsInRadius(rootPart.Position, explorationRadius)) do
+                                if part.CanCollide and not part:FindFirstAncestorWhichIsA("Model") then
+                                    table.insert(points, part.Position)
+                                end
+                            end
+                            
+                            if #points > 0 then
+                                local targetPos = points[math.random(1, #points)] + Vector3.new(0, 5, 0)
+                                humanoid:MoveTo(targetPos)
+                                collectNearbyItems()
+                                updateAIMemory("explore", 5)
+                                gainExperience(2)
+                            end
+                        end
+                        
+                        lastPosition = currentPos
+                        lastHealth = currentHealth
+                        
+                        -- Update AI level display
+                        aiControlButton.Text = "AI CONTROL: ON (Level " .. aiLevel .. ")"
+                    end
+                end
+                RunService.Heartbeat:Wait()
+            end
+        end)
+    end
+end)
+
+local ammoHackButton = Instance.new("TextButton")
 ammoHackButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 ammoHackButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ammoHackButton.Font = Enum.Font.GothamSemibold
@@ -2227,7 +2538,7 @@ end)
     ammoHackButton.Size = UDim2.new(0.4, -10, 0, 20)
     ammoHackButton.Position = UDim2.new(0.6, 0, 0, 240)
     ammoHackButton.Parent = frame
-    
+
     -- Animation Button
     local animationButton = Instance.new("TextButton")
     animationButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
@@ -2282,7 +2593,7 @@ end)
 
         currentAnimIndex = (currentAnimIndex % #animations) + 1
         local anim = animations[currentAnimIndex]
-        
+
         local character = player.Character
         if character and character:FindFirstChild("Humanoid") then
             local animation = Instance.new("Animation")
@@ -2741,7 +3052,7 @@ end)
             for i = 1, 1000 do
                 local clone = character:Clone()
                 clone.Name = "Clone_" .. i
-                
+
                 -- Remove scripts and sounds from clone
                 for _, item in pairs(clone:GetDescendants()) do
                     if item:IsA("Script") or item:IsA("LocalScript") or item:IsA("Sound") then
@@ -2754,7 +3065,7 @@ end)
                 local radius = 5 + i * 0.1
                 local x = math.cos(angle) * radius
                 local z = math.sin(angle) * radius
-                
+
                 local rootPart = clone:FindFirstChild("HumanoidRootPart")
                 if rootPart then
                     rootPart.CFrame = character.HumanoidRootPart.CFrame * CFrame.new(x, 0, z)
@@ -2814,7 +3125,7 @@ end)
 
             autoFarmConnection = game:GetService("RunService").Heartbeat:Connect(function()
                 if not autoFarmEnabled then return end
-                
+
                 -- Try to find and modify common resource values
                 local resourceTypes = {
                     "Money", "Coins", "Cash", "Points", "Gold", "Gems", "XP",
