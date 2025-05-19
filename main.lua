@@ -2288,7 +2288,7 @@ local function gainExperience(amount)
         experiencePoints = experiencePoints - nextLevelExp
         nextLevelExp = nextLevelExp * 1.5
         updateAIStats()
-        
+
         -- Visual feedback for level up
         local levelUpText = Instance.new("TextLabel")
         levelUpText.Text = "AI Level Up! Level " .. aiLevel
@@ -2300,24 +2300,24 @@ local function gainExperience(amount)
         levelUpText.Font = Enum.Font.GothamBold
         levelUpText.TextSize = 24
         levelUpText.Parent = game.Players.LocalPlayer.PlayerGui
-        
+
         game:GetService("Debris"):AddItem(levelUpText, 2)
     end
 end
 
 local function getClosestEnemy()
     local currentTime = tick()
-    
+
     -- Update cache if needed
     if currentTime - lastCacheUpdate > cacheUpdateInterval then
         cachedEnemies = {}
         local character = player.Character
         if not character then return nil end
-        
+
         -- Use spatial hashing for more efficient enemy detection
         local characterPos = character.PrimaryPart.Position
         local searchRadius = 100
-        
+
         for _, obj in ipairs(Workspace:GetPartBoundsInRadius(characterPos, searchRadius)) do
             local model = obj:FindFirstAncestorWhichIsA("Model")
             if model and model:FindFirstChild("Humanoid") and 
@@ -2327,16 +2327,16 @@ local function getClosestEnemy()
                 table.insert(cachedEnemies, model)
             end
         end
-        
+
         lastCacheUpdate = currentTime
     end
-    
+
     -- Find closest enemy from cache
     local closest = nil
     local minDistance = math.huge
     local character = player.Character
     if not character then return nil end
-    
+
     for _, enemy in ipairs(cachedEnemies) do
         if enemy.Parent and enemy.Humanoid.Health > 0 then
             local distance = (enemy.HumanoidRootPart.Position - character.PrimaryPart.Position).Magnitude
@@ -2346,24 +2346,24 @@ local function getClosestEnemy()
             end
         end
     end
-    
+
     return closest
 end
 
 local function collectNearbyItems()
     local character = player.Character
     if not character then return end
-    
+
     local rootPart = character:FindFirstChild("HumanoidRootPart")
     if not rootPart then return end
-    
+
     for _, item in pairs(workspace:GetDescendants()) do
         if item:IsA("BasePart") and 
            (item.Name:lower():find("item") or 
             item.Name:lower():find("pickup") or 
             item.Name:lower():find("weapon") or 
             item.Name:lower():find("heal")) then
-            
+
             local distance = (item.Position - rootPart.Position).Magnitude
             if distance < 20 then
                 item.CFrame = rootPart.CFrame
@@ -2384,10 +2384,10 @@ end
 
 local function getBestAction()
     if #aiMemory == 0 then return "explore" end
-    
+
     local actionScores = {}
     local timeWeight = math.sin(tick() * 0.1) * 0.2 + 0.8 -- Time-based variation
-    
+
     -- Factor in AI personality and mood
     local moodModifier = {
         happy = 1.2,
@@ -2395,12 +2395,12 @@ local function getBestAction()
         cautious = 0.8,
         aggressive = 1.5
     }
-    
+
     -- Calculate weighted scores
     for _, memory in pairs(aiMemory) do
         local baseScore = memory.reward
         local personalityMod = 1.0
-        
+
         if memory.action == "attack" then
             personalityMod = aiPersonality.aggression
         elseif memory.action == "explore" then
@@ -2410,20 +2410,20 @@ local function getBestAction()
         elseif memory.action == "defend" then
             personalityMod = aiPersonality.caution
         end
-        
+
         local moodMod = moodModifier[aiMood] or 1.0
         local finalScore = baseScore * personalityMod * moodMod * timeWeight
-        
+
         actionScores[memory.action] = (actionScores[memory.action] or 0) + finalScore
     end
-    
+
     -- Add random exploration factor
     local explorationChance = 0.1 + (1 - aiPersonality.caution) * 0.2
     if math.random() < explorationChance then
         local actions = {"explore", "search_items", "interact", "practice_combat", "observe"}
         return actions[math.random(#actions)]
     end
-    
+
     -- Find best action
     local bestAction = "explore"
     local bestScore = -math.huge
@@ -2433,40 +2433,142 @@ local function getBestAction()
             bestAction = action
         end
     end
-    
+
     -- Update AI mood based on success
     if bestScore > 10 then
         aiMood = "happy"
     elseif bestScore < 0 then
         aiMood = "cautious"
     end
-    
+
     -- Record the decision in knowledge base
     table.insert(aiKnowledge.playerInteractions, {
         time = tick(),
         action = bestAction,
         score = bestScore
     })
-    
+
     return bestAction
 end
 
 local function performAction(action)
     local character = player.Character
     if not character then return end
-    
+
     local humanoid = character:FindFirstChild("Humanoid")
     local rootPart = character:FindFirstChild("HumanoidRootPart")
     if not humanoid or not rootPart then return end
-    
+
+    -- Add random delays and human-like behavior
+    local function humanDelay()
+        wait(math.random() * 0.5 + 0.1) -- Random delay between 0.1-0.6 seconds
+    end
+
+    -- Simulate human-like mouse movement
+    local function simulateMouseMovement()
+        local camera = workspace.CurrentCamera
+        local startCF = camera.CFrame
+        local endCF = CFrame.new(camera.CFrame.Position, rootPart.Position + Vector3.new(
+            math.random(-5, 5),
+            math.random(0, 3),
+            math.random(-5, 5)
+        ))
+        
+        for i = 0, 1, 0.1 do
+            camera.CFrame = startCF:Lerp(endCF, i)
+            wait(0.02)
+        end
+    end
+
     if action == "explore" then
-        -- Find interesting locations
+        -- More natural exploration patterns with smooth movement
         local points = workspace:GetPartBoundsInRadius(rootPart.Position, 100)
         if #points > 0 then
-            local target = points[math.random(#points)]
-            humanoid:MoveTo(target.Position + Vector3.new(0, 5, 0))
+            -- Select a reasonable target point
+            local targetPoint = points[math.random(#points)]
+            local targetPos = targetPoint.Position + Vector3.new(0, 3, 0)
+            
+            -- Calculate direction to target
+            local direction = (targetPos - rootPart.Position).Unit
+            local targetCF = CFrame.new(rootPoint.Position, targetPos)
+            
+            -- Smooth rotation to face target
+            local rotationDuration = 0.5
+            local startCF = rootPart.CFrame
+            for i = 0, 1, 0.1 do
+                rootPart.CFrame = startCF:Lerp(targetCF, i)
+                wait(rotationDuration/10)
+            end
+            
+            -- Move towards target with natural walking
+            humanoid:MoveTo(targetPos)
+            
+            -- Occasional natural jumping while walking (not too frequent)
+            spawn(function()
+                while (rootPart.Position - targetPos).Magnitude > 5 do
+                    if math.random() < 0.1 then -- 10% chance to jump
+                        wait(math.random(2, 4)) -- Wait between jumps
+                        humanoid.Jump = true
+                        wait(1) -- Wait for jump to complete
+                    end
+                    wait(0.5)
+                end
+            end)
+            
+            -- Wait until close to target before next action
+            wait(1)
+
+            -- Choose interesting points to explore (like a real player would)
+            local potentialTargets = {}
+            for _, point in ipairs(points) do
+                local score = 0
+                
+                -- Prefer elevated positions (players like high ground)
+                if point.Position.Y > rootPart.Position.Y then
+                    score = score + 2
+                end
+                
+                -- Prefer points near items or interactive objects
+                for _, obj in pairs(workspace:GetPartsInPart(point)) do
+                    if obj.Name:lower():find("item") or obj.Name:lower():find("pickup") then
+                        score = score + 3
+                    end
+                end
+                
+                -- Avoid obvious traps or dangerous areas
+                local dangerousObjects = workspace:GetPartsInPart(point)
+                for _, obj in pairs(dangerousObjects) do
+                    if obj.Name:lower():find("trap") or obj.Name:lower():find("damage") then
+                        score = score - 5
+                    end
+                end
+                
+                table.insert(potentialTargets, {point = point, score = score})
+            end
+
+            -- Choose target based on scores (weighted random selection)
+            table.sort(potentialTargets, function(a, b) return a.score > b.score end)
+            local target = potentialTargets[math.random(1, math.min(3, #potentialTargets))].point
+            local distance = (target.Position - rootPart.Position).Magnitude
+            
+            -- Break long movements into smaller segments
+            if distance > 30 then
+                local segments = math.ceil(distance / 30)
+                for i = 1, segments do
+                    local segmentPos = rootPart.Position:Lerp(target.Position, i/segments)
+                    humanoid:MoveTo(segmentPos + Vector3.new(0, 5, 0))
+                    wait(math.random() * 0.5 + 0.3)
+                    
+                    -- Occasionally look around while moving
+                    if math.random() < 0.2 then
+                        simulateMouseMovement()
+                    end
+                end
+            else
+                humanoid:MoveTo(target.Position + Vector3.new(0, 5, 0))
+            end
         end
-        
+
     elseif action == "search_items" then
         -- Look for valuable items
         for _, item in pairs(workspace:GetDescendants()) do
@@ -2479,20 +2581,139 @@ local function performAction(action)
                 end
             end
         end
-        
+
     elseif action == "practice_combat" then
-        -- Practice combat moves
-        local animations = humanoid:GetPlayingAnimationTracks()
-        for _, anim in pairs(animations) do
-            anim:Stop()
-        end
-        
+        -- Advanced human-like combat behavior
         local tool = character:FindFirstChildOfClass("Tool")
         if tool then
-            tool:Activate()
-            aiKnowledge.combatExperience = aiKnowledge.combatExperience + 1
+            -- Simulate realistic combat decision making
+            local enemies = {}
+            local nearbyCovers = {}
+            
+            -- Find enemies and potential cover spots
+            for _, obj in pairs(workspace:GetDescendants()) do
+                if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and 
+                   obj ~= character and obj:FindFirstChild("HumanoidRootPart") then
+                    local distance = (obj.HumanoidRootPart.Position - rootPart.Position).Magnitude
+                    table.insert(enemies, {
+                        model = obj,
+                        distance = distance,
+                        health = obj.Humanoid.Health,
+                        isAggressive = obj:FindFirstChildOfClass("Tool") ~= nil
+                    })
+                elseif obj:IsA("BasePart") and obj.Size.Y > 3 and obj.CanCollide then
+                    -- Identify potential cover spots
+                    table.insert(nearbyCovers, obj)
+                end
+            end
+
+            -- Sort enemies by threat level
+            table.sort(enemies, function(a, b)
+                local threatA = (a.isAggressive and 2 or 1) * (100/a.distance) * (a.health/100)
+                local threatB = (b.isAggressive and 2 or 1) * (100/b.distance) * (b.health/100)
+                return threatA > threatB
+            end)
+
+            if #enemies > 0 then
+                local target = enemies[1].model
+                local targetRoot = target.HumanoidRootPart
+                local targetDistance = enemies[1].distance
+
+                -- Combat strategy based on situation
+                if targetDistance < 10 then
+                    -- Close combat behavior
+                    if math.random() < 0.4 then
+                        -- Dodge or jump
+                        humanoid.Jump = true
+                        local dodgeDir = Vector3.new(math.random(-1, 1), 0, math.random(-1, 1)).Unit * 8
+                        humanoid:MoveTo(rootPart.Position + dodgeDir)
+                    end
+                elseif targetDistance < 30 then
+                    -- Mid-range combat
+                    if #nearbyCovers > 0 and math.random() < 0.3 then
+                        -- Use cover strategically
+                        local cover = nearbyCovers[math.random(#nearbyCovers)]
+                        humanoid:MoveTo(cover.Position + (cover.Position - targetRoot.Position).Unit * 5)
+                    end
+                else
+                    -- Long-range combat
+                    if math.random() < 0.6 then
+                        -- Find high ground or better position
+                        local bestPos = rootPart.Position
+                        for _, cover in ipairs(nearbyCovers) do
+                            if cover.Position.Y > bestPos.Y then
+                                bestPos = cover.Position
+                            end
+                        end
+                        humanoid:MoveTo(bestPos + Vector3.new(0, 2, 0))
+                    end
+                end
+
+                -- Realistic aiming behavior
+                local aimTime = math.random() * 0.2 + 0.1
+                local startCF = workspace.CurrentCamera.CFrame
+                local targetPos = targetRoot.Position + Vector3.new(
+                    math.random(-0.5, 0.5),
+                    math.random(0, 1),
+                    math.random(-0.5, 0.5)
+                )
+                local endCF = CFrame.new(workspace.CurrentCamera.CFrame.Position, targetPos)
+
+                -- Smooth aim movement
+                for i = 0, 1, 0.1 do
+                    workspace.CurrentCamera.CFrame = startCF:Lerp(endCF, i)
+                    wait(aimTime/10)
+                end
+
+                -- Add random aim shake
+                local shakeIntensity = math.random() * 0.2
+                workspace.CurrentCamera.CFrame = workspace.CurrentCamera.CFrame * CFrame.new(
+                    math.random(-shakeIntensity, shakeIntensity),
+                    math.random(-shakeIntensity, shakeIntensity),
+                    0
+                )
+
+                -- Attack with human-like timing
+                if math.random() < 0.8 then
+                    tool:Activate()
+                    wait(math.random() * 0.2 + 0.1)
+                end
+
+                aiKnowledge.combatExperience = aiKnowledge.combatExperience + 1
+            end
+
+            if #enemies > 0 then
+                local target = enemies[math.random(#enemies)]
+                local targetRoot = target.HumanoidRootPart
+
+                -- Simulate human aiming
+                local aimTime = math.random() * 0.3 + 0.1
+                local startCF = workspace.CurrentCamera.CFrame
+                local endCF = CFrame.new(workspace.CurrentCamera.CFrame.Position, targetRoot.Position)
+
+                for i = 0, 1, 0.1 do
+                    workspace.CurrentCamera.CFrame = startCF:Lerp(endCF, i)
+                    wait(aimTime/10)
+                end
+
+                -- Add random inaccuracy to aim
+                local inaccuracy = Vector3.new(
+                    math.random(-1, 1),
+                    math.random(-1, 1),
+                    math.random(-1, 1)
+                ) * (1 - math.min(aiKnowledge.combatExperience/100, 0.9))
+
+                tool:Activate()
+                aiKnowledge.combatExperience = aiKnowledge.combatExperience + 1
+
+                -- Random combat movement
+                if math.random() < 0.7 then
+                    local dodgeDir = Vector3.new(math.random(-1, 1), 0, math.random(-1, 1)).Unit * 10
+                    humanoid:MoveTo(rootPart.Position + dodgeDir)
+                end
+            end
         end
-        
+
     elseif action == "observe" then
         -- Observe surroundings and learn
         local nearbyPlayers = {}
@@ -2504,7 +2725,7 @@ local function performAction(action)
                 end
             end
         end
-        
+
         -- Learn from players
         for _, observed in pairs(nearbyPlayers) do
             if observed.Character then
@@ -2518,14 +2739,14 @@ local function performAction(action)
             end
         end
     end
-    
+
     aiLastAction = tick()
 end
 
 aiControlButton.MouseButton1Click:Connect(function()
     aiEnabled = not aiEnabled
     aiControlButton.Text = "AI CONTROL: " .. (aiEnabled and "ON" .. " (Level " .. aiLevel .. " | " .. aiMood .. ")" or "OFF")
-    
+
     if aiEnabled then
         -- Main AI loop
         spawn(function()
@@ -2536,26 +2757,26 @@ aiControlButton.MouseButton1Click:Connect(function()
                     continue
                 end
                 lastUpdate = currentTime
-                
+
                 local character = player.Character
                 if character then
                     local humanoid = character:FindFirstChild("Humanoid")
                     local rootPart = character:FindFirstChild("HumanoidRootPart")
-                    
+
                     if humanoid and rootPart then
                         local currentHealth = humanoid.Health
                         local currentPos = rootPart.Position
-                        
+
                         -- Check if stuck or blocked
                         local lastPositions = {}
                         local stuckThreshold = 3 -- Number of checks before considering stuck
                         local stuckDistance = 1 -- Minimum distance to move to not be considered stuck
-                        
+
                         -- Add current position to history
                         table.insert(lastPositions, currentPos)
                         if #lastPositions > stuckThreshold then
                             table.remove(lastPositions, 1)
-                            
+
                             -- Check if stuck
                             local isStuck = true
                             for i = 1, #lastPositions - 1 do
@@ -2564,16 +2785,16 @@ aiControlButton.MouseButton1Click:Connect(function()
                                     break
                                 end
                             end
-                            
+
                             -- Check for obstacles
                             local rayOrigin = rootPart.Position
                             local rayDirection = rootPart.CFrame.LookVector * 4
                             local raycastParams = RaycastParams.new()
                             raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
                             raycastParams.FilterDescendantsInstances = {character}
-                            
+
                             local raycastResult = workspace:Raycast(rayOrigin, rayDirection, raycastParams)
-                            
+
                             -- Jump if stuck or obstacle detected
                             if isStuck or raycastResult then
                                 humanoid.Jump = true
@@ -2589,11 +2810,11 @@ aiControlButton.MouseButton1Click:Connect(function()
                                 humanoid:MoveTo(rootPart.Position + newDirection)
                             end
                         end
-                        
+
                         -- Check for idle state
                         local lastMovementTime = lastMovementTime or tick()
                         local idleThreshold = 3 -- 15 seconds threshold
-                        
+
                         if (currentPos - (lastPosition or currentPos)).Magnitude < 0.1 then
                             if tick() - lastMovementTime > idleThreshold then
                                 -- Generate random direction and distance
@@ -2604,10 +2825,10 @@ aiControlButton.MouseButton1Click:Connect(function()
                                     0,
                                     math.sin(randomAngle) * randomDistance
                                 )
-                                
+
                                 -- Move to new position
                                 humanoid:MoveTo(newPos)
-                                
+
                                 -- Play random animation
                                 if #animations > 0 then
                                     local randomAnim = animations[math.random(1, #animations)]
@@ -2616,23 +2837,23 @@ aiControlButton.MouseButton1Click:Connect(function()
                                     local animTrack = humanoid:LoadAnimation(animation)
                                     animTrack:Play()
                                 end
-                                
+
                                 lastMovementTime = tick()
                             end
                         else
                             lastMovementTime = tick()
                         end
-                        
+
                         -- Player friendship system
                         for _, otherPlayer in pairs(game.Players:GetPlayers()) do
                             if otherPlayer ~= player and otherPlayer.Character then
                                 local distance = (otherPlayer.Character.HumanoidRootPart.Position - currentPos).Magnitude
-                                
+
                                 if distance < 10 then
                                     -- Friendly behavior
                                     aiMood = "happy"
                                     local randomAction = math.random(1, 3)
-                                    
+
                                     if randomAction == 1 then
                                         -- Wave animation
                                         local waveAnim = Instance.new("Animation")
@@ -2649,7 +2870,7 @@ aiControlButton.MouseButton1Click:Connect(function()
                                         local animTrack = humanoid:LoadAnimation(danceAnim)
                                         animTrack:Play()
                                     end
-                                    
+
                                     -- Store friendship data
                                     aiKnowledge.playerInteractions[otherPlayer.Name] = {
                                         lastInteraction = tick(),
@@ -2659,18 +2880,18 @@ aiControlButton.MouseButton1Click:Connect(function()
                                 end
                             end
                         end
-                        
+
                         -- Apply learned improvements
                         if currentHealth < humanoid.MaxHealth then
                             humanoid.Health = math.min(humanoid.MaxHealth, currentHealth + aiStats.healthRegen)
                         end
-                        
+
                         -- Calculate reward and learn from experience
                         if lastPosition and lastHealth then
                             local reward = 0
                             reward = reward + (currentHealth - lastHealth) * 2
                             reward = reward + (currentPos - lastPosition).Magnitude * 0.1
-                            
+
                             -- Additional rewards for successful actions
                             if currentHealth > lastHealth then
                                 reward = reward + 5 -- Healing reward
@@ -2680,16 +2901,16 @@ aiControlButton.MouseButton1Click:Connect(function()
                                 reward = reward - 2 -- Penalty for taking damage
                             end
                         end
-                        
+
                         -- Strategic decision making
                         local enemy = getClosestEnemy()
                         if enemy then
                             local enemyDistance = (enemy.HumanoidRootPart.Position - rootPart.Position).Magnitude
                             local enemyHealth = enemy.Humanoid.Health
-                            
+
                             -- Calculate threat level
                             local threatLevel = (enemyHealth / enemy.Humanoid.MaxHealth) * (100 / enemyDistance)
-                            
+
                             if currentHealth < 50 or threatLevel > 1.5 then
                                 -- Strategic retreat and healing
                                 local safeSpots = {}
@@ -2698,10 +2919,10 @@ aiControlButton.MouseButton1Click:Connect(function()
                                         table.insert(safeSpots, part)
                                     end
                                 end
-                                
+
                                 local safeSpot = safeSpots[math.random(1, #safeSpots)] or rootPart
                                 local retreatPos = safeSpot.Position + Vector3.new(0, 5, 0)
-                                
+
                                 humanoid:MoveTo(retreatPos)
                                 updateAIMemory("strategic_retreat", 15)
                                 gainExperience(5)
@@ -2712,7 +2933,7 @@ aiControlButton.MouseButton1Click:Connect(function()
                                     -- Calculate optimal attack position
                                     local attackPos = enemy.HumanoidRootPart.Position + 
                                         (rootPart.Position - enemy.HumanoidRootPart.Position).Unit * 8
-                                    
+
                                     -- Execute attack with learned improvements
                                     if math.random(1, 100) <= aiStats.criticalChance then
                                         -- Critical hit
@@ -2724,7 +2945,7 @@ aiControlButton.MouseButton1Click:Connect(function()
                                         gainExperience(10)
                                         updateAIMemory("attack", 10)
                                     end
-                                    
+
                                     humanoid:MoveTo(attackPos)
                                 end
                             end
@@ -2732,14 +2953,14 @@ aiControlButton.MouseButton1Click:Connect(function()
                             -- Intelligent exploration
                             local explorationRadius = 50 + aiLevel * 2
                             local points = {}
-                            
+
                             -- Find strategic points
                             for _, part in ipairs(Workspace:GetPartBoundsInRadius(rootPart.Position, explorationRadius)) do
                                 if part.CanCollide and not part:FindFirstAncestorWhichIsA("Model") then
                                     table.insert(points, part.Position)
                                 end
                             end
-                            
+
                             if #points > 0 then
                                 local targetPos = points[math.random(1, #points)] + Vector3.new(0, 5, 0)
                                 humanoid:MoveTo(targetPos)
@@ -2748,10 +2969,10 @@ aiControlButton.MouseButton1Click:Connect(function()
                                 gainExperience(2)
                             end
                         end
-                        
+
                         lastPosition = currentPos
                         lastHealth = currentHealth
-                        
+
                         -- Update AI level display
                         aiControlButton.Text = "AI CONTROL: ON (Level " .. aiLevel .. ")"
                     end
@@ -3553,6 +3774,213 @@ end)
                 animationTrack:Play()
                 animationTrack:AdjustSpeed(1.2) -- Dance speed
                 animationTrack.Looped = true -- Make the dance loop
+
+                -- Анализ окружения и препятствий
+                local function analyzeEnvironment(character)
+                    local obstacles = {}
+                    local players = {}
+                    local rootPart = character:FindFirstChild("HumanoidRootPart")
+                    if not rootPart then return obstacles, players end
+
+                    -- Поиск препятствий и игроков в радиусе
+                    local searchRadius = 50
+                    local nearbyObjects = workspace:GetPartBoundsInRadius(rootPart.Position, searchRadius)
+                    
+                    for _, obj in ipairs(nearbyObjects) do
+                        -- Проверка препятствий
+                        if obj.CanCollide and obj.Name ~= "HumanoidRootPart" then
+                            table.insert(obstacles, obj)
+                        end
+                        
+                        -- Поиск игроков
+                        local model = obj.Parent
+                        if model and model:FindFirstChild("Humanoid") and game.Players:GetPlayerFromCharacter(model) then
+                            table.insert(players, model)
+                        end
+                    end
+                    
+                    return obstacles, players
+                end
+
+                -- Танцевальные анимации
+                local danceAnimations = {
+                    {id = "rbxassetid://507771019", name = "Dance1"},
+                    {id = "rbxassetid://507771955", name = "Dance2"},
+                    {id = "rbxassetid://507772104", name = "Dance3"},
+                    {id = "rbxassetid://507776043", name = "Dance4"},
+                }
+
+                -- Функция для выполнения случайного танца
+                local function performRandomDance(humanoid)
+                    local randomDance = danceAnimations[math.random(#danceAnimations)]
+                    local animation = Instance.new("Animation")
+                    animation.AnimationId = randomDance.id
+                    local animTrack = humanoid:LoadAnimation(animation)
+                    animTrack:Play()
+                    wait(math.random(3, 6)) -- Танцуем 3-6 секунд
+                    animTrack:Stop()
+                end
+
+                -- Основной цикл анализа и взаимодействия
+                spawn(function()
+                    while trollingEnabled do
+                        local character = player.Character
+                        if character then
+                            local humanoid = character:FindFirstChild("Humanoid")
+                            local rootPart = character:FindFirstChild("HumanoidRootPart")
+                            
+                            if humanoid and rootPart then
+                                local obstacles, nearbyPlayers = analyzeEnvironment(character)
+                                
+                                -- Обход препятствий
+                                for _, obstacle in ipairs(obstacles) do
+                                    local distance = (obstacle.Position - rootPart.Position).Magnitude
+                                    if distance < 5 then
+                                        -- Уклоняемся от препятствия
+                                        local avoidanceDirection = (rootPart.Position - obstacle.Position).Unit
+                                        local targetPos = rootPart.Position + avoidanceDirection * 10
+                                        humanoid:MoveTo(targetPos)
+                                    end
+                                end
+                                
+                                -- Взаимодействие с игроками
+                                for _, nearbyPlayer in ipairs(nearbyPlayers) do
+                                    local distance = (nearbyPlayer.HumanoidRootPart.Position - rootPart.Position).Magnitude
+                                    if distance < 10 and math.random() < 0.3 then -- 30% шанс начать танцевать
+                                        -- Подходим к игроку
+                                        local targetPos = nearbyPlayer.HumanoidRootPart.Position + Vector3.new(math.random(-3, 3), 0, math.random(-3, 3))
+                                        humanoid:MoveTo(targetPos)
+                                        wait(1)
+                                        -- Танцуем
+                                        performRandomDance(humanoid)
+                                    end
+                                end
+                            end
+                        end
+                        wait(1)
+                    end
+                end)
+
+                -- AI Intelligence System
+                local aiState = {
+                    lastAction = tick(),
+                    actionCooldown = 0.5,
+                    locations = {},
+                    targets = {},
+                    mood = "neutral",
+                    intelligence = 0,
+                    experience = 0
+                }
+
+                -- Random movement patterns
+                local function generateRandomMovement()
+                    local patterns = {
+                        zigzag = function(root)
+                            local amplitude = math.random(5, 15)
+                            local frequency = math.random(2, 5)
+                            local direction = Vector3.new(math.random(-1, 1), 0, math.random(-1, 1)).Unit
+                            return root.Position + direction * amplitude + Vector3.new(
+                                math.sin(tick() * frequency) * amplitude,
+                                0,
+                                math.cos(tick() * frequency) * amplitude
+                            )
+                        end,
+                        circle = function(root)
+                            local radius = math.random(5, 10)
+                            local angle = tick() * math.random(1, 3)
+                            return root.Position + Vector3.new(
+                                math.cos(angle) * radius,
+                                0,
+                                math.sin(angle) * radius
+                            )
+                        end,
+                        patrol = function(root)
+                            local distance = math.random(10, 30)
+                            local angle = math.random() * math.pi * 2
+                            return root.Position + Vector3.new(
+                                math.cos(angle) * distance,
+                                0,
+                                math.sin(angle) * distance
+                            )
+                        end
+                    }
+                    
+                    return patterns[({
+                        "zigzag", "circle", "patrol"
+                    })[math.random(1, 3)]]
+                end
+
+                -- AI Learning System
+                local function updateAIIntelligence()
+                    aiState.intelligence = math.min(aiState.intelligence + 0.1, 100)
+                    aiState.experience = aiState.experience + 1
+                    
+                    -- Adapt behavior based on intelligence
+                    if aiState.intelligence > 50 then
+                        aiState.actionCooldown = math.max(0.2, aiState.actionCooldown - 0.01)
+                    end
+                end
+
+                -- Intelligent movement system
+                spawn(function()
+                    while trollingEnabled do
+                        local character = player.Character
+                        if character then
+                            local humanoid = character:FindFirstChild("Humanoid")
+                            local rootPart = character:FindFirstChild("HumanoidRootPart")
+                            
+                            if humanoid and rootPart then
+                                -- Generate intelligent movement
+                                local movePattern = generateRandomMovement()
+                                local targetPosition = movePattern(rootPart)
+                                
+                                -- Check for obstacles
+                                local ray = Ray.new(rootPart.Position, (targetPosition - rootPart.Position).Unit * 10)
+                                local hit = workspace:FindPartOnRay(ray, character)
+                                
+                                if hit then
+                                    -- Avoid obstacle
+                                    targetPosition = rootPart.Position + Vector3.new(
+                                        math.random(-10, 10),
+                                        0,
+                                        math.random(-10, 10)
+                                    )
+                                end
+                                
+                                -- Move to target
+                                humanoid:MoveTo(targetPosition)
+                                
+                                -- Occasional jumping
+                                if math.random() < 0.1 then
+                                    humanoid.Jump = true
+                                end
+                                
+                                -- Update AI intelligence
+                                updateAIIntelligence()
+                                
+                                -- Dynamic interaction with environment
+                                local nearbyPlayers = {}
+                                for _, otherPlayer in pairs(game.Players:GetPlayers()) do
+                                    if otherPlayer ~= player and otherPlayer.Character then
+                                        local distance = (otherPlayer.Character:GetPrimaryPartCFrame().Position - rootPart.Position).Magnitude
+                                        if distance < 20 then
+                                            table.insert(nearbyPlayers, otherPlayer)
+                                        end
+                                    end
+                                end
+                                
+                                -- Social interaction
+                                if #nearbyPlayers > 0 and math.random() < 0.3 then
+                                    local targetPlayer = nearbyPlayers[math.random(#nearbyPlayers)]
+                                    humanoid:MoveTo(targetPlayer.Character:GetPrimaryPartCFrame().Position)
+                                    wait(1)
+                                    performRandomDance(humanoid)
+                                end
+                            end
+                        end
+                        wait(aiState.actionCooldown)
+                    end
+                end)
 
                 -- Add screen effects
                 local screenGui = Instance.new("ScreenGui")
