@@ -2232,15 +2232,30 @@ local aiEnabled = false
 local aiMemory = {}
 local lastPosition = nil
 local lastHealth = 100
-local learningRate = 0.1
-local updateInterval = 0.1 -- Reduce update frequency for better performance
+local learningRate = 0.25  -- Increased learning rate
+local updateInterval = 0.05 -- Faster updates
 local lastUpdate = 0
 local cachedEnemies = {}
 local lastCacheUpdate = 0
-local cacheUpdateInterval = 1 -- Update enemy cache every second
+local cacheUpdateInterval = 0.5 -- Faster cache updates
 local experiencePoints = 0
 local aiLevel = 1
 local nextLevelExp = 100
+local aiPersonality = {
+    aggression = 0.5,
+    caution = 0.5,
+    curiosity = 0.8,
+    helpfulness = 0.7
+}
+local aiMood = "neutral"
+local aiLastAction = tick()
+local aiActionCooldown = 0.1
+local aiKnowledge = {
+    combatExperience = 0,
+    explorationData = {},
+    itemMemory = {},
+    playerInteractions = {}
+}
 
 -- Cached workspace
 local Players = game:GetService("Players")
@@ -2371,10 +2386,45 @@ local function getBestAction()
     if #aiMemory == 0 then return "explore" end
     
     local actionScores = {}
+    local timeWeight = math.sin(tick() * 0.1) * 0.2 + 0.8 -- Time-based variation
+    
+    -- Factor in AI personality and mood
+    local moodModifier = {
+        happy = 1.2,
+        neutral = 1.0,
+        cautious = 0.8,
+        aggressive = 1.5
+    }
+    
+    -- Calculate weighted scores
     for _, memory in pairs(aiMemory) do
-        actionScores[memory.action] = (actionScores[memory.action] or 0) + memory.reward
+        local baseScore = memory.reward
+        local personalityMod = 1.0
+        
+        if memory.action == "attack" then
+            personalityMod = aiPersonality.aggression
+        elseif memory.action == "explore" then
+            personalityMod = aiPersonality.curiosity
+        elseif memory.action == "help" then
+            personalityMod = aiPersonality.helpfulness
+        elseif memory.action == "defend" then
+            personalityMod = aiPersonality.caution
+        end
+        
+        local moodMod = moodModifier[aiMood] or 1.0
+        local finalScore = baseScore * personalityMod * moodMod * timeWeight
+        
+        actionScores[memory.action] = (actionScores[memory.action] or 0) + finalScore
     end
     
+    -- Add random exploration factor
+    local explorationChance = 0.1 + (1 - aiPersonality.caution) * 0.2
+    if math.random() < explorationChance then
+        local actions = {"explore", "search_items", "interact", "practice_combat", "observe"}
+        return actions[math.random(#actions)]
+    end
+    
+    -- Find best action
     local bestAction = "explore"
     local bestScore = -math.huge
     for action, score in pairs(actionScores) do
@@ -2384,12 +2434,97 @@ local function getBestAction()
         end
     end
     
+    -- Update AI mood based on success
+    if bestScore > 10 then
+        aiMood = "happy"
+    elseif bestScore < 0 then
+        aiMood = "cautious"
+    end
+    
+    -- Record the decision in knowledge base
+    table.insert(aiKnowledge.playerInteractions, {
+        time = tick(),
+        action = bestAction,
+        score = bestScore
+    })
+    
     return bestAction
+end
+
+local function performAction(action)
+    local character = player.Character
+    if not character then return end
+    
+    local humanoid = character:FindFirstChild("Humanoid")
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    if not humanoid or not rootPart then return end
+    
+    if action == "explore" then
+        -- Find interesting locations
+        local points = workspace:GetPartBoundsInRadius(rootPart.Position, 100)
+        if #points > 0 then
+            local target = points[math.random(#points)]
+            humanoid:MoveTo(target.Position + Vector3.new(0, 5, 0))
+        end
+        
+    elseif action == "search_items" then
+        -- Look for valuable items
+        for _, item in pairs(workspace:GetDescendants()) do
+            if item:IsA("BasePart") and item.Name:lower():match("item") then
+                local distance = (item.Position - rootPart.Position).Magnitude
+                if distance < 50 then
+                    humanoid:MoveTo(item.Position)
+                    aiKnowledge.itemMemory[item] = tick()
+                    break
+                end
+            end
+        end
+        
+    elseif action == "practice_combat" then
+        -- Practice combat moves
+        local animations = humanoid:GetPlayingAnimationTracks()
+        for _, anim in pairs(animations) do
+            anim:Stop()
+        end
+        
+        local tool = character:FindFirstChildOfClass("Tool")
+        if tool then
+            tool:Activate()
+            aiKnowledge.combatExperience = aiKnowledge.combatExperience + 1
+        end
+        
+    elseif action == "observe" then
+        -- Observe surroundings and learn
+        local nearbyPlayers = {}
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player.Character and player.Character ~= character then
+                local distance = (player.Character.HumanoidRootPart.Position - rootPart.Position).Magnitude
+                if distance < 50 then
+                    table.insert(nearbyPlayers, player)
+                end
+            end
+        end
+        
+        -- Learn from players
+        for _, observed in pairs(nearbyPlayers) do
+            if observed.Character then
+                local tool = observed.Character:FindFirstChildOfClass("Tool")
+                if tool then
+                    aiKnowledge.playerInteractions[observed.Name] = {
+                        lastSeen = tick(),
+                        tool = tool.Name
+                    }
+                end
+            end
+        end
+    end
+    
+    aiLastAction = tick()
 end
 
 aiControlButton.MouseButton1Click:Connect(function()
     aiEnabled = not aiEnabled
-    aiControlButton.Text = "AI CONTROL: " .. (aiEnabled and "ON" .. " (Level " .. aiLevel .. ")" or "OFF")
+    aiControlButton.Text = "AI CONTROL: " .. (aiEnabled and "ON" .. " (Level " .. aiLevel .. " | " .. aiMood .. ")" or "OFF")
     
     if aiEnabled then
         -- Main AI loop
@@ -2410,6 +2545,120 @@ aiControlButton.MouseButton1Click:Connect(function()
                     if humanoid and rootPart then
                         local currentHealth = humanoid.Health
                         local currentPos = rootPart.Position
+                        
+                        -- Check if stuck or blocked
+                        local lastPositions = {}
+                        local stuckThreshold = 3 -- Number of checks before considering stuck
+                        local stuckDistance = 1 -- Minimum distance to move to not be considered stuck
+                        
+                        -- Add current position to history
+                        table.insert(lastPositions, currentPos)
+                        if #lastPositions > stuckThreshold then
+                            table.remove(lastPositions, 1)
+                            
+                            -- Check if stuck
+                            local isStuck = true
+                            for i = 1, #lastPositions - 1 do
+                                if (lastPositions[i] - lastPositions[i + 1]).Magnitude > stuckDistance then
+                                    isStuck = false
+                                    break
+                                end
+                            end
+                            
+                            -- Check for obstacles
+                            local rayOrigin = rootPart.Position
+                            local rayDirection = rootPart.CFrame.LookVector * 4
+                            local raycastParams = RaycastParams.new()
+                            raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+                            raycastParams.FilterDescendantsInstances = {character}
+                            
+                            local raycastResult = workspace:Raycast(rayOrigin, rayDirection, raycastParams)
+                            
+                            -- Jump if stuck or obstacle detected
+                            if isStuck or raycastResult then
+                                humanoid.Jump = true
+                                -- Add upward force for better jumping
+                                rootPart.Velocity = Vector3.new(
+                                    rootPart.Velocity.X,
+                                    50, -- Jump force
+                                    rootPart.Velocity.Z
+                                )
+                                -- Try to move in a slightly different direction
+                                local randomAngle = math.rad(math.random(-45, 45))
+                                local newDirection = CFrame.Angles(0, randomAngle, 0) * rayDirection
+                                humanoid:MoveTo(rootPart.Position + newDirection)
+                            end
+                        end
+                        
+                        -- Check for idle state
+                        local lastMovementTime = lastMovementTime or tick()
+                        local idleThreshold = 3 -- 15 seconds threshold
+                        
+                        if (currentPos - (lastPosition or currentPos)).Magnitude < 0.1 then
+                            if tick() - lastMovementTime > idleThreshold then
+                                -- Generate random direction and distance
+                                local randomAngle = math.random() * math.pi * 2
+                                local randomDistance = math.random(20, 50)
+                                local newPos = currentPos + Vector3.new(
+                                    math.cos(randomAngle) * randomDistance,
+                                    0,
+                                    math.sin(randomAngle) * randomDistance
+                                )
+                                
+                                -- Move to new position
+                                humanoid:MoveTo(newPos)
+                                
+                                -- Play random animation
+                                if #animations > 0 then
+                                    local randomAnim = animations[math.random(1, #animations)]
+                                    local animation = Instance.new("Animation")
+                                    animation.AnimationId = randomAnim.id
+                                    local animTrack = humanoid:LoadAnimation(animation)
+                                    animTrack:Play()
+                                end
+                                
+                                lastMovementTime = tick()
+                            end
+                        else
+                            lastMovementTime = tick()
+                        end
+                        
+                        -- Player friendship system
+                        for _, otherPlayer in pairs(game.Players:GetPlayers()) do
+                            if otherPlayer ~= player and otherPlayer.Character then
+                                local distance = (otherPlayer.Character.HumanoidRootPart.Position - currentPos).Magnitude
+                                
+                                if distance < 10 then
+                                    -- Friendly behavior
+                                    aiMood = "happy"
+                                    local randomAction = math.random(1, 3)
+                                    
+                                    if randomAction == 1 then
+                                        -- Wave animation
+                                        local waveAnim = Instance.new("Animation")
+                                        waveAnim.AnimationId = "rbxassetid://507770239"
+                                        local animTrack = humanoid:LoadAnimation(waveAnim)
+                                        animTrack:Play()
+                                    elseif randomAction == 2 then
+                                        -- Follow player
+                                        humanoid:MoveTo(otherPlayer.Character.HumanoidRootPart.Position)
+                                    elseif randomAction == 3 then
+                                        -- Dance animation
+                                        local danceAnim = Instance.new("Animation")
+                                        danceAnim.AnimationId = "rbxassetid://507771019"
+                                        local animTrack = humanoid:LoadAnimation(danceAnim)
+                                        animTrack:Play()
+                                    end
+                                    
+                                    -- Store friendship data
+                                    aiKnowledge.playerInteractions[otherPlayer.Name] = {
+                                        lastInteraction = tick(),
+                                        friendshipLevel = (aiKnowledge.playerInteractions[otherPlayer.Name] and 
+                                            aiKnowledge.playerInteractions[otherPlayer.Name].friendshipLevel or 0) + 1
+                                    }
+                                end
+                            end
+                        end
                         
                         -- Apply learned improvements
                         if currentHealth < humanoid.MaxHealth then
