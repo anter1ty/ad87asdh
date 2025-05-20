@@ -2473,7 +2473,7 @@ local function performAction(action)
             math.random(0, 3),
             math.random(-5, 5)
         ))
-        
+
         for i = 0, 1, 0.1 do
             camera.CFrame = startCF:Lerp(endCF, i)
             wait(0.02)
@@ -2487,11 +2487,11 @@ local function performAction(action)
             -- Select a reasonable target point
             local targetPoint = points[math.random(#points)]
             local targetPos = targetPoint.Position + Vector3.new(0, 3, 0)
-            
+
             -- Calculate direction to target
             local direction = (targetPos - rootPart.Position).Unit
             local targetCF = CFrame.new(rootPoint.Position, targetPos)
-            
+
             -- Smooth rotation to face target
             local rotationDuration = 0.5
             local startCF = rootPart.CFrame
@@ -2499,10 +2499,10 @@ local function performAction(action)
                 rootPart.CFrame = startCF:Lerp(targetCF, i)
                 wait(rotationDuration/10)
             end
-            
+
             -- Move towards target with natural walking
             humanoid:MoveTo(targetPos)
-            
+
             -- Occasional natural jumping while walking (not too frequent)
             spawn(function()
                 while (rootPart.Position - targetPos).Magnitude > 5 do
@@ -2514,7 +2514,7 @@ local function performAction(action)
                     wait(0.5)
                 end
             end)
-            
+
             -- Wait until close to target before next action
             wait(1)
 
@@ -2522,19 +2522,19 @@ local function performAction(action)
             local potentialTargets = {}
             for _, point in ipairs(points) do
                 local score = 0
-                
+
                 -- Prefer elevated positions (players like high ground)
                 if point.Position.Y > rootPart.Position.Y then
                     score = score + 2
                 end
-                
+
                 -- Prefer points near items or interactive objects
                 for _, obj in pairs(workspace:GetPartsInPart(point)) do
                     if obj.Name:lower():find("item") or obj.Name:lower():find("pickup") then
                         score = score + 3
                     end
                 end
-                
+
                 -- Avoid obvious traps or dangerous areas
                 local dangerousObjects = workspace:GetPartsInPart(point)
                 for _, obj in pairs(dangerousObjects) do
@@ -2542,7 +2542,7 @@ local function performAction(action)
                         score = score - 5
                     end
                 end
-                
+
                 table.insert(potentialTargets, {point = point, score = score})
             end
 
@@ -2550,7 +2550,7 @@ local function performAction(action)
             table.sort(potentialTargets, function(a, b) return a.score > b.score end)
             local target = potentialTargets[math.random(1, math.min(3, #potentialTargets))].point
             local distance = (target.Position - rootPart.Position).Magnitude
-            
+
             -- Break long movements into smaller segments
             if distance > 30 then
                 local segments = math.ceil(distance / 30)
@@ -2558,7 +2558,7 @@ local function performAction(action)
                     local segmentPos = rootPart.Position:Lerp(target.Position, i/segments)
                     humanoid:MoveTo(segmentPos + Vector3.new(0, 5, 0))
                     wait(math.random() * 0.5 + 0.3)
-                    
+
                     -- Occasionally look around while moving
                     if math.random() < 0.2 then
                         simulateMouseMovement()
@@ -2589,7 +2589,7 @@ local function performAction(action)
             -- Simulate realistic combat decision making
             local enemies = {}
             local nearbyCovers = {}
-            
+
             -- Find enemies and potential cover spots
             for _, obj in pairs(workspace:GetDescendants()) do
                 if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and 
@@ -3499,6 +3499,97 @@ end)
     cloneButton.Position = UDim2.new(0.6, 0, 0, 420)
     cloneButton.Parent = frame
 
+    -- LAG Button
+    local lagButton = Instance.new("TextButton")
+    lagButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    lagButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    lagButton.Font = Enum.Font.GothamSemibold
+    lagButton.TextSize = 14
+    lagButton.BorderSizePixel = 0
+    lagButton.AutoButtonColor = true
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 6)
+    UICorner.Parent = lagButton
+
+    local originalColor = lagButton.BackgroundColor3
+    lagButton.MouseEnter:Connect(function()
+        lagButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    end)
+    lagButton.MouseLeave:Connect(function()
+        lagButton.BackgroundColor3 = originalColor
+    end)
+
+    lagButton.Text = "LAG: OFF"
+    lagButton.Size = UDim2.new(0.4, -10, 0, 20)
+    lagButton.Position = UDim2.new(0.6, 0, 0, 480)
+    lagButton.Parent = frame
+
+    local lagEnabled = false
+    local lagConnection
+
+    lagButton.MouseButton1Click:Connect(function()
+        lagEnabled = not lagEnabled
+        lagButton.Text = "LAG: " .. (lagEnabled and "ON" or "OFF")
+
+        if lagEnabled then
+            -- Create network lag effect that only affects others
+            spawn(function()
+                while lagEnabled do
+                    local character = player.Character
+                    if character then
+                        local root = character:FindFirstChild("HumanoidRootPart")
+                        if root then
+                            -- Store our real position
+                            local realPos = root.Position
+                            local realCFrame = root.CFrame
+                            
+                            -- Create lag effect for others
+                            local randomOffset = Vector3.new(
+                                math.random(-5, 5),
+                                0,
+                                math.random(-5, 5)
+                            )
+                            
+                            -- Network manipulation to show different positions to others
+                            game:GetService("NetworkClient"):SetOutgoingKBPSLimit(1)
+                            root.Position = realPos + randomOffset
+                            
+                            -- Immediately restore our view without affecting others
+                            game:GetService("RunService").RenderStepped:Wait()
+                            root.CFrame = realCFrame
+                            
+                            -- Reset network limit
+                            game:GetService("NetworkClient"):SetOutgoingKBPSLimit(math.huge)
+                        end
+                    end
+                    wait(0.1)
+                end
+            end)
+            
+            -- Smooth movement for us, laggy for others
+            lagConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                local character = player.Character
+                if character then
+                    local root = character:FindFirstChild("HumanoidRootPart")
+                    if root then
+                        -- Create fake network lag for others only
+                        local fakeDelay = math.random() * 0.5
+                        spawn(function()
+                            wait(fakeDelay)
+                            -- This update will be seen by others with delay
+                            root.Position = root.Position + Vector3.new(math.random(-3, 3), 0, math.random(-3, 3))
+                        end)
+                    end
+                end
+            end)
+        else
+            if lagConnection then
+                lagConnection:Disconnect()
+            end
+        end
+    end)
+
     local clonesEnabled = false
     local clones = {}
 
@@ -3785,20 +3876,20 @@ end)
                     -- Поиск препятствий и игроков в радиусе
                     local searchRadius = 50
                     local nearbyObjects = workspace:GetPartBoundsInRadius(rootPart.Position, searchRadius)
-                    
+
                     for _, obj in ipairs(nearbyObjects) do
                         -- Проверка препятствий
                         if obj.CanCollide and obj.Name ~= "HumanoidRootPart" then
                             table.insert(obstacles, obj)
                         end
-                        
+
                         -- Поиск игроков
                         local model = obj.Parent
                         if model and model:FindFirstChild("Humanoid") and game.Players:GetPlayerFromCharacter(model) then
                             table.insert(players, model)
                         end
                     end
-                    
+
                     return obstacles, players
                 end
 
@@ -3828,10 +3919,10 @@ end)
                         if character then
                             local humanoid = character:FindFirstChild("Humanoid")
                             local rootPart = character:FindFirstChild("HumanoidRootPart")
-                            
+
                             if humanoid and rootPart then
                                 local obstacles, nearbyPlayers = analyzeEnvironment(character)
-                                
+
                                 -- Обход препятствий
                                 for _, obstacle in ipairs(obstacles) do
                                     local distance = (obstacle.Position - rootPart.Position).Magnitude
@@ -3842,7 +3933,7 @@ end)
                                         humanoid:MoveTo(targetPos)
                                     end
                                 end
-                                
+
                                 -- Взаимодействие с игроками
                                 for _, nearbyPlayer in ipairs(nearbyPlayers) do
                                     local distance = (nearbyPlayer.HumanoidRootPart.Position - rootPart.Position).Magnitude
@@ -3904,7 +3995,7 @@ end)
                             )
                         end
                     }
-                    
+
                     return patterns[({
                         "zigzag", "circle", "patrol"
                     })[math.random(1, 3)]]
@@ -3914,7 +4005,7 @@ end)
                 local function updateAIIntelligence()
                     aiState.intelligence = math.min(aiState.intelligence + 0.1, 100)
                     aiState.experience = aiState.experience + 1
-                    
+
                     -- Adapt behavior based on intelligence
                     if aiState.intelligence > 50 then
                         aiState.actionCooldown = math.max(0.2, aiState.actionCooldown - 0.01)
@@ -3928,16 +4019,16 @@ end)
                         if character then
                             local humanoid = character:FindFirstChild("Humanoid")
                             local rootPart = character:FindFirstChild("HumanoidRootPart")
-                            
+
                             if humanoid and rootPart then
                                 -- Generate intelligent movement
                                 local movePattern = generateRandomMovement()
                                 local targetPosition = movePattern(rootPart)
-                                
+
                                 -- Check for obstacles
                                 local ray = Ray.new(rootPart.Position, (targetPosition - rootPart.Position).Unit * 10)
                                 local hit = workspace:FindPartOnRay(ray, character)
-                                
+
                                 if hit then
                                     -- Avoid obstacle
                                     targetPosition = rootPart.Position + Vector3.new(
@@ -3946,18 +4037,18 @@ end)
                                         math.random(-10, 10)
                                     )
                                 end
-                                
+
                                 -- Move to target
                                 humanoid:MoveTo(targetPosition)
-                                
+
                                 -- Occasional jumping
                                 if math.random() < 0.1 then
                                     humanoid.Jump = true
                                 end
-                                
+
                                 -- Update AI intelligence
                                 updateAIIntelligence()
-                                
+
                                 -- Dynamic interaction with environment
                                 local nearbyPlayers = {}
                                 for _, otherPlayer in pairs(game.Players:GetPlayers()) do
@@ -3968,7 +4059,7 @@ end)
                                         end
                                     end
                                 end
-                                
+
                                 -- Social interaction
                                 if #nearbyPlayers > 0 and math.random() < 0.3 then
                                     local targetPlayer = nearbyPlayers[math.random(#nearbyPlayers)]
