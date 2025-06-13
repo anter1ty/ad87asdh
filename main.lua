@@ -1,5 +1,5 @@
 -- Настройки
-local menuTitle = "CXNT"
+local menuTitle = "OmniSEX"
 local toggleKey = Enum.KeyCode.Insert
 local defaultWalkSpeed = 16
 local autoShowMenu = true
