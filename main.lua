@@ -18,7 +18,7 @@ loadingGui.Name = "LoadingIndicator"
 loadingGui.Parent = game:GetService("CoreGui")
 
 local loadingText = Instance.new("TextLabel")
-loadingText.Text = "Идет загрузка скрипта CXNT..."
+loadingText.Text = "Идет загрузка скрипта OMNI..."
 loadingText.Size = UDim2.new(0, 200, 0, 30)
 loadingText.Position = UDim2.new(0, 10, 0, 10)
 loadingText.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
@@ -30,6 +30,7 @@ loadingText.Parent = loadingGui
 
 -- Основной интерфейс
 local player = game:GetService("Players").LocalPlayer
+local TweenService = game:GetService("TweenService")
 local gui = Instance.new("ScreenGui")
 gui.Name = "CXNT_Menu"
 gui.Parent = game:GetService("CoreGui")
@@ -37,28 +38,57 @@ gui.Parent = game:GetService("CoreGui")
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0, 600, 0, 600)
 frame.Position = UDim2.new(0.5, -300, 0.5, -300)
-frame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+frame.BackgroundColor3 = Color3.fromRGB(19, 19, 19)
 frame.BorderSizePixel = 0
 frame.Visible = false
 frame.Parent = gui
 
--- Add red accent bar at top
+-- Добавляем скругленные углы
+local frameCorner = Instance.new("UICorner")
+frameCorner.CornerRadius = UDim.new(0, 12)
+frameCorner.Parent = frame
+
+-- Добавляем обводку
+local frameStroke = Instance.new("UIStroke")
+frameStroke.Color = Color3.fromRGB(255, 0, 0)
+frameStroke.Thickness = 2
+frameStroke.Transparency = 0.3
+frameStroke.Parent = frame
+
+-- Добавляем тень с улучшенным эффектом
+local shadow = Instance.new("Frame")
+shadow.Size = UDim2.new(1, 20, 1, 20)
+shadow.Position = UDim2.new(0, -10, 0, -10)
+shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+shadow.BackgroundTransparency = 0.7
+shadow.BorderSizePixel = 0
+shadow.ZIndex = frame.ZIndex - 1
+shadow.Parent = gui
+
+local shadowCorner = Instance.new("UICorner")
+shadowCorner.CornerRadius = UDim.new(0, 12)
+shadowCorner.Parent = shadow
+
+-- Add gradient accent bar at top
 local accentBar = Instance.new("Frame")
-accentBar.Size = UDim2.new(1, 0, 0, 3)
+accentBar.Size = UDim2.new(1, 0, 0, 4)
 accentBar.Position = UDim2.new(0, 0, 0, 0)
 accentBar.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 accentBar.BorderSizePixel = 0
 accentBar.Parent = frame
 
--- Добавляем тень
-local shadow = Instance.new("ImageLabel")
-shadow.Size = UDim2.new(1, 20, 1, 20)
-shadow.Position = UDim2.new(0, -10, 0, -10)
-shadow.BackgroundTransparency = 1
-shadow.Image = "rbxasset://textures/ui/dialog_shadow.png"
-shadow.ScaleType = Enum.ScaleType.Slice
-shadow.SliceCenter = Rect.new(10, 10, 10, 10)
-shadow.Parent = frame
+local accentCorner = Instance.new("UICorner")
+accentCorner.CornerRadius = UDim.new(0, 12)
+accentCorner.Parent = accentBar
+
+-- Добавляем градиент к акцентной полосе
+local accentGradient = Instance.new("UIGradient")
+accentGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 100, 100)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+}
+accentGradient.Parent = accentBar
 
 -- Добавляем часы МСК
 local timeLabel = Instance.new("TextLabel")
@@ -75,97 +105,248 @@ timeLabel.Parent = frame
 spawn(function()
     while wait(1) do
         local time = os.date("!*t")
-        timeLabel.Text = string.format("МСК: %02d:%02d:%02d", time.hour + 3, time.min, time.sec)
+        timeLabel.Text = string.format("", time.hour + 3, time.min, time.sec)
     end
 end)
 
--- Watermark with gradient animation
+-- Красивый watermark с улучшенным дизайном
 local watermark = Instance.new("TextLabel")
-watermark.Text = "CXNT V2"
-watermark.Size = UDim2.new(0, 250, 0, 30)
+watermark.Text = "⚡ OMNI V3 ⚡"
+watermark.Size = UDim2.new(0, 300, 0, 40)
 watermark.Position = UDim2.new(0, 10, 0, 0)
 watermark.BackgroundTransparency = 1
 watermark.Font = Enum.Font.GothamBold
-watermark.TextSize = 16
+watermark.TextSize = 20
 watermark.TextXAlignment = Enum.TextXAlignment.Left
-watermark.TextColor3 = Color3.fromRGB(255, 0, 0)  -- Set to red
 watermark.TextStrokeTransparency = 0
 watermark.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
 watermark.Parent = gui
 
--- Gradient animation
+-- Скругленные углы для watermark
+local watermarkCorner = Instance.new("UICorner")
+watermarkCorner.CornerRadius = UDim.new(0, 8)
+watermarkCorner.Parent = watermark
+
+-- Расширенная цветовая палитра
 local gradientColors = {
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),    -- Red
-    ColorSequenceKeypoint.new(0.2, Color3.fromRGB(255, 165, 0)), -- Orange
-    ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 255, 0)), -- Yellow
-    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(0, 255, 0)),   -- Green
-    ColorSequenceKeypoint.new(0.8, Color3.fromRGB(0, 0, 255)),   -- Blue
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(128, 0, 128))    -- Purple
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 127)),   -- Розовый
+    ColorSequenceKeypoint.new(0.15, Color3.fromRGB(255, 0, 0)),  -- Красный
+    ColorSequenceKeypoint.new(0.3, Color3.fromRGB(255, 127, 0)), -- Оранжевый
+    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(255, 255, 0)), -- Желтый
+    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(0, 255, 0)),   -- Зеленый
+    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(0, 127, 255)), -- Голубой
+    ColorSequenceKeypoint.new(0.9, Color3.fromRGB(127, 0, 255)), -- Фиолетовый
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 255))    -- Пурпурный
 }
 
 local uiGradient = Instance.new("UIGradient")
 uiGradient.Color = ColorSequence.new(gradientColors)
 uiGradient.Parent = watermark
 
--- Animate gradient
+-- Плавная анимация градиента с переливами
 local gradientOffset = 0
+local gradientRotation = 0
 game:GetService("RunService").RenderStepped:Connect(function()
-    gradientOffset = (gradientOffset + 0.002) % 1
-    uiGradient.Offset = Vector2.new(gradientOffset, 0)
+    gradientOffset = (gradientOffset + 0.004) % 2
+    gradientRotation = (gradientRotation + 0.5) % 360
+
+    -- Плавное движение градиента
+    uiGradient.Offset = Vector2.new(math.sin(gradientOffset * math.pi) * 0.5, 0)
+    uiGradient.Rotation = gradientRotation
+
+    -- Добавляем пульсацию размера текста
+    local pulse = 20 + math.sin(tick() * 2) * 2
+    watermark.TextSize = pulse
 end)
 
--- Add clickable image under watermark
-local imageButton = Instance.new("ImageButton")
-imageButton.Size = UDim2.new(0, 50, 0, 50)  -- Small size for the image
-imageButton.Position = UDim2.new(0, 10, 0, 35)  -- Position under watermark
-imageButton.Image = "rbxassetid://15729160523"  -- Using Roblox asset ID
-imageButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)  -- White background
-imageButton.BackgroundTransparency = 0.5  -- Semi-transparent background
-imageButton.ScaleType = Enum.ScaleType.Fit
-imageButton.Parent = gui
+-- Добавляем эффект свечения
+local glowEffect = Instance.new("Frame")
+glowEffect.Size = UDim2.new(1, 10, 1, 10)
+glowEffect.Position = UDim2.new(0, -5, 0, -5)
+glowEffect.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+glowEffect.BackgroundTransparency = 0.9
+glowEffect.BorderSizePixel = 0
+glowEffect.ZIndex = watermark.ZIndex - 1
+glowEffect.Parent = watermark
 
--- Add click functionality
-imageButton.MouseButton1Click:Connect(function()
-    frame.Visible = not frame.Visible
+local glowCorner = Instance.new("UICorner")
+glowCorner.CornerRadius = UDim.new(0, 12)
+glowCorner.Parent = glowEffect
+
+-- Анимация свечения
+spawn(function()
+    while wait(0.1) do
+        local glow = 0.9 + math.sin(tick() * 3) * 0.1
+        glowEffect.BackgroundTransparency = glow
+    end
 end)
 
--- MSK Time next to watermark
+-- MSK Time в левом нижнем углу с красивым дизайном
+local mskTimeFrame = Instance.new("Frame")
+mskTimeFrame.Size = UDim2.new(0, 200, 0, 50)
+mskTimeFrame.Position = UDim2.new(0, 10, 1, -60)
+mskTimeFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+mskTimeFrame.BackgroundTransparency = 0.3
+mskTimeFrame.BorderSizePixel = 0
+mskTimeFrame.Parent = gui
+
+-- Скругленные углы для времени
+local timeCorner = Instance.new("UICorner")
+timeCorner.CornerRadius = UDim.new(0, 12)
+timeCorner.Parent = mskTimeFrame
+
+-- Обводка для времени
+local timeStroke = Instance.new("UIStroke")
+timeStroke.Color = Color3.fromRGB(255, 0, 0)
+timeStroke.Thickness = 2
+timeStroke.Transparency = 0.4
+timeStroke.Parent = mskTimeFrame
+
+-- Градиент для фона времени
+local timeGradient = Instance.new("UIGradient")
+timeGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 30)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 15, 15))
+}
+timeGradient.Rotation = 45
+timeGradient.Parent = mskTimeFrame
+
 local mskTime = Instance.new("TextLabel")
-mskTime.Size = UDim2.new(0, 150, 0, 30)
-mskTime.Position = UDim2.new(0, 100, 0, 0)
+mskTime.Size = UDim2.new(1, 0, 1, 0)
+mskTime.Position = UDim2.new(0, 0, 0, 0)
 mskTime.BackgroundTransparency = 1
 mskTime.TextColor3 = Color3.fromRGB(255, 255, 255)
-mskTime.TextTransparency = 0.2
 mskTime.Font = Enum.Font.GothamBold
-mskTime.TextSize = 16
-mskTime.TextXAlignment = Enum.TextXAlignment.Left
-mskTime.TextStrokeTransparency = 0.5
+mskTime.TextSize = 18
+mskTime.TextXAlignment = Enum.TextXAlignment.Center
+mskTime.TextYAlignment = Enum.TextYAlignment.Center
+mskTime.TextStrokeTransparency = 0
 mskTime.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-mskTime.Parent = gui
+mskTime.Parent = mskTimeFrame
 
--- Update MSK time
+-- Иконка часов
+local clockIcon = Instance.new("TextLabel")
+clockIcon.Size = UDim2.new(0, 20, 0, 20)
+clockIcon.Position = UDim2.new(0, 10, 0, 15)
+clockIcon.BackgroundTransparency = 1
+clockIcon.Text = "🕒"
+clockIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+clockIcon.Font = Enum.Font.GothamBold
+clockIcon.TextSize = 16
+clockIcon.TextXAlignment = Enum.TextXAlignment.Center
+clockIcon.TextYAlignment = Enum.TextYAlignment.Center
+clockIcon.Parent = mskTimeFrame
+
+-- Обновление времени с красивой анимацией
 spawn(function()
     while wait(1) do
         local time = os.date("!*t")
         local hours = (time.hour + 3) % 24
-        mskTime.Text = string.format("МСК %02d:%02d:%02d", hours, time.min, time.sec)
+        local timeString = string.format("МСК %02d:%02d:%02d", hours, time.min, time.sec)
+        
+        -- Анимация изменения цвета при обновлении
+        local originalColor = mskTime.TextColor3
+        mskTime.TextColor3 = Color3.fromRGB(255, 100, 100)
+        mskTime.Text = timeString
+        
+        -- Возвращаем обычный цвет
+        wait(0.1)
+        mskTime.TextColor3 = originalColor
+        
+        -- Анимация пульсации обводки
+        local pulseTween = game:GetService("TweenService"):Create(
+            timeStroke,
+            TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+            {Transparency = 0.1}
+        )
+        pulseTween:Play()
+        
+        wait(0.5)
+        
+        local pulseTween2 = game:GetService("TweenService"):Create(
+            timeStroke,
+            TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+            {Transparency = 0.4}
+        )
+        pulseTween2:Play()
     end
 end)
 
 local title = Instance.new("TextLabel")
 title.Text = menuTitle
-title.Size = UDim2.new(1, 0, 0, 30)
-title.Position = UDim2.new(0, 0, 0, 0)
-title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+title.Size = UDim2.new(1, 0, 0, 40)
+title.Position = UDim2.new(0, 0, 0, 10)
+title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Font = Enum.Font.GothamBold
-title.TextSize = 18
+title.TextSize = 20
+title.BorderSizePixel = 0
 title.Parent = frame
 
+-- Скругленные углы для заголовка
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 8)
+titleCorner.Parent = title
 
+-- Обводка для заголовка
+local titleStroke = Instance.new("UIStroke")
+titleStroke.Color = Color3.fromRGB(255, 0, 0)
+titleStroke.Thickness = 1
+titleStroke.Transparency = 0.5
+titleStroke.Parent = title
+
+
+
+-- Функция для создания стилизованных кнопок
+local function createStyledButton(text, size, position, parent)
+    local button = Instance.new("TextButton")
+    button.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.Font = Enum.Font.GothamSemibold
+    button.TextSize = 14
+    button.BorderSizePixel = 0
+    button.AutoButtonColor = false
+    button.Text = text
+    button.Size = size
+    button.Position = position
+    button.Parent = parent
+
+    -- Скругленные углы
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = button
+
+    -- Обводка
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(255, 0, 0)
+    stroke.Thickness = 1
+    stroke.Transparency = 0.6
+    stroke.Parent = button
+
+    -- Анимации при наведении
+    button.MouseEnter:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+            BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        }):Play()
+        TweenService:Create(stroke, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+            Transparency = 0.2
+        }):Play()
+    end)
+
+    button.MouseLeave:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+            BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+        }):Play()
+        TweenService:Create(stroke, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+            Transparency = 0.6
+        }):Play()
+    end)
+
+    return button
+end
 
 -- Sky Customization
-local skyButton = Instance.new("TextButton")
+local skyButton = createStyledButton("SKY: DEFAULT", UDim2.new(0.4, -10, 0, 30), UDim2.new(0, 10, 0, 420), frame)
 skyButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 skyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 skyButton.Font = Enum.Font.GothamSemibold
@@ -580,83 +761,14 @@ local skyStyles = {
 }
 
 -- Кнопка ESP
-local espButton = Instance.new("TextButton")
-espButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-espButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-espButton.Font = Enum.Font.GothamSemibold
-espButton.TextSize = 14
-espButton.BorderSizePixel = 0
-espButton.AutoButtonColor = true
+local espButton = createStyledButton("ESP: OFF", UDim2.new(0.4, -10, 0, 30), UDim2.new(0, 10, 0, 90), frame)
 
--- Add rounded corners
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 6)
-UICorner.Parent = espButton
+local itemEspButton = createStyledButton("ITEM ESP: OFF", UDim2.new(0.4, -10, 0, 30), UDim2.new(0, 10, 0, 450), frame)
 
--- Add hover effect
-local originalColor = espButton.BackgroundColor3
-espButton.MouseEnter:Connect(function()
-    espButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-end)
-espButton.MouseLeave:Connect(function()
-    espButton.BackgroundColor3 = originalColor
-end)
-espButton.Text = "ESP: OFF"
-espButton.Size = UDim2.new(0.4, -10, 0, 20)
-espButton.Position = UDim2.new(0, 10, 0, 90)
+-- Voice Chat Button
+local voiceChatButton = createStyledButton("VOICE CHAT: OFF", UDim2.new(0.4, -10, 0, 30), UDim2.new(0, 10, 0, 480), frame)
 
-local itemEspButton = Instance.new("TextButton")
-itemEspButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-itemEspButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-itemEspButton.Font = Enum.Font.GothamSemibold
-itemEspButton.TextSize = 14
-itemEspButton.BorderSizePixel = 0
-itemEspButton.AutoButtonColor = true
-
--- Add rounded corners
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 6)
-UICorner.Parent = itemEspButton
-
--- Add hover effect
-local originalColor = itemEspButton.BackgroundColor3
-itemEspButton.MouseEnter:Connect(function()
-    itemEspButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-end)
-itemEspButton.MouseLeave:Connect(function()
-    itemEspButton.BackgroundColor3 = originalColor
-end)
-itemEspButton.Text = "ITEM ESP: OFF"
-itemEspButton.Size = UDim2.new(0.4, -10, 0, 20)
-itemEspButton.Position = UDim2.new(0, 10, 0, 450)
-itemEspButton.Parent = frame
-espButton.Parent = frame
-
-local noclipButton = Instance.new("TextButton")
-noclipButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-noclipButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-noclipButton.Font = Enum.Font.GothamSemibold
-noclipButton.TextSize = 14
-noclipButton.BorderSizePixel = 0
-noclipButton.AutoButtonColor = true
-
--- Add rounded corners
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 6)
-UICorner.Parent = noclipButton
-
--- Add hover effect
-local originalColor = noclipButton.BackgroundColor3
-noclipButton.MouseEnter:Connect(function()
-    noclipButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-end)
-noclipButton.MouseLeave:Connect(function()
-    noclipButton.BackgroundColor3 = originalColor
-end)
-noclipButton.Text = "NOCLIP: OFF"
-noclipButton.Size = UDim2.new(0.4, -10, 0, 20)
-noclipButton.Position = UDim2.new(0, 10, 0, 120)
-noclipButton.Parent = frame
+local noclipButton = createStyledButton("NOCLIP: OFF", UDim2.new(0.4, -10, 0, 30), UDim2.new(0, 10, 0, 120), frame)
 
 -- Кнопка Spin
 local spinButton = Instance.new("TextButton")
@@ -951,36 +1063,85 @@ skyButton.Parent = frame
 
 local speedLabel = Instance.new("TextLabel")
 speedLabel.Text = "SPEED PLAYER: " .. defaultWalkSpeed
-speedLabel.Size = UDim2.new(1, -20, 0, 20)
-speedLabel.Position = UDim2.new(0, 10, 0, 520)
-speedLabel.BackgroundTransparency = 1
+speedLabel.Size = UDim2.new(1, -20, 0, 25)
+speedLabel.Position = UDim2.new(0, 10, 0, 550)
+speedLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 speedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-speedLabel.Font = Enum.Font.Gotham
-speedLabel.TextSize = 14
-speedLabel.TextXAlignment = Enum.TextXAlignment.Left
+speedLabel.Font = Enum.Font.GothamBold
+speedLabel.TextSize = 16
+speedLabel.TextXAlignment = Enum.TextXAlignment.Center
+speedLabel.BorderSizePixel = 0
 speedLabel.Parent = frame
 
+-- Скругленные углы для лейбла
+local speedLabelCorner = Instance.new("UICorner")
+speedLabelCorner.CornerRadius = UDim.new(0, 6)
+speedLabelCorner.Parent = speedLabel
+
+-- Обводка для лейбла
+local speedLabelStroke = Instance.new("UIStroke")
+speedLabelStroke.Color = Color3.fromRGB(255, 0, 0)
+speedLabelStroke.Thickness = 1
+speedLabelStroke.Transparency = 0.7
+speedLabelStroke.Parent = speedLabel
+
 local slider = Instance.new("Frame")
-slider.Size = UDim2.new(1, -20, 0, 10)
-slider.Position = UDim2.new(0, 10, 0, 530)
-slider.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+slider.Size = UDim2.new(1, -20, 0, 15)
+slider.Position = UDim2.new(0, 10, 0, 585)
+slider.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 slider.BorderSizePixel = 0
 slider.Parent = frame
 
+-- Скругленные углы для слайдера
+local sliderCorner = Instance.new("UICorner")
+sliderCorner.CornerRadius = UDim.new(0, 8)
+sliderCorner.Parent = slider
+
+-- Обводка для слайдера
+local sliderStroke = Instance.new("UIStroke")
+sliderStroke.Color = Color3.fromRGB(255, 0, 0)
+sliderStroke.Thickness = 1
+sliderStroke.Transparency = 0.8
+sliderStroke.Parent = slider
+
 local sliderFill = Instance.new("Frame")
-sliderFill.Size = UDim2.new(defaultWalkSpeed / 100, 0, 1, 0)
+sliderFill.Size = UDim2.new(defaultWalkSpeed / 1000, 0, 1, 0)
 sliderFill.Position = UDim2.new(0, 0, 0, 0)
-sliderFill.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
 sliderFill.BorderSizePixel = 0
 sliderFill.Parent = slider
 
+-- Градиентная заливка для слайдера
+local sliderGradient = Instance.new("UIGradient")
+sliderGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 100, 100)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+}
+sliderGradient.Parent = sliderFill
+
+-- Скругленные углы для заливки
+local sliderFillCorner = Instance.new("UICorner")
+sliderFillCorner.CornerRadius = UDim.new(0, 8)
+sliderFillCorner.Parent = sliderFill
+
 local sliderButton = Instance.new("TextButton")
-sliderButton.Size = UDim2.new(0, 10, 0, 20)
-sliderButton.Position = UDim2.new(defaultWalkSpeed / 100, -5, 0, -5)
+sliderButton.Size = UDim2.new(0, 15, 0, 25)
+sliderButton.Position = UDim2.new(defaultWalkSpeed / 1000, -8, 0, -5)
 sliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 sliderButton.BorderSizePixel = 0
 sliderButton.Text = ""
 sliderButton.Parent = slider
+
+-- Скругленные углы для кнопки слайдера
+local sliderButtonCorner = Instance.new("UICorner")
+sliderButtonCorner.CornerRadius = UDim.new(0, 8)
+sliderButtonCorner.Parent = sliderButton
+
+-- Обводка для кнопки слайдера
+local sliderButtonStroke = Instance.new("UIStroke")
+sliderButtonStroke.Color = Color3.fromRGB(255, 0, 0)
+sliderButtonStroke.Thickness = 2
+sliderButtonStroke.Parent = sliderButton
 
 -- ESP Функции
 local espObjects = {}
@@ -988,54 +1149,249 @@ local itemEspObjects = {}
 local colorPhase = 0
 local colorSpeed = 0.01
 
--- Функция ESP для предметов
+-- Функция ESP для предметов с улучшенными визуальными эффектами
 local function createItemEsp(item)
     if not item:IsA("BasePart") then return end
 
+    -- Создаем красивый name label с рамкой
+    local nameLabel = Instance.new("BillboardGui")
+    nameLabel.Name = "CXNT_ITEM_LABEL"
+    nameLabel.Size = UDim2.new(0, 200, 0, 60)
+    nameLabel.StudsOffset = Vector3.new(0, item.Size.Y + 1, 0)
+    nameLabel.AlwaysOnTop = true
+    nameLabel.Parent = item
+
+    -- Определяем тип предмета и его характеристики
+    local itemName = item.Name:lower()
+    local itemType = "unknown"
+    local itemColor = Color3.fromRGB(255, 255, 255)
+    local itemIcon = "📦"
+    local itemRarity = "common"
+
+    if itemName:find("weapon") or itemName:find("gun") or itemName:find("sword") or itemName:find("knife") then
+        itemType = "weapon"
+        itemColor = Color3.fromRGB(255, 50, 50)
+        itemIcon = "⚔️"
+        itemRarity = "rare"
+    elseif itemName:find("ammo") or itemName:find("mag") then
+        itemType = "ammo"
+        itemColor = Color3.fromRGB(255, 255, 50)
+        itemIcon = "💥"
+        itemRarity = "common"
+    elseif itemName:find("heal") or itemName:find("med") or itemName:find("bandage") then
+        itemType = "heal"
+        itemColor = Color3.fromRGB(50, 255, 50)
+        itemIcon = "💚"
+        itemRarity = "uncommon"
+    elseif itemName:find("bond") or itemName:find("money") or itemName:find("cash") then
+        itemType = "money"
+        itemColor = Color3.fromRGB(50, 255, 255)
+        itemIcon = "💰"
+        itemRarity = "legendary"
+    elseif itemName:find("armor") or itemName:find("vest") then
+        itemType = "armor"
+        itemColor = Color3.fromRGB(150, 150, 255)
+        itemIcon = "🛡️"
+        itemRarity = "epic"
+    else
+        itemType = "misc"
+        itemColor = Color3.fromRGB(200, 200, 200)
+        itemIcon = "📦"
+        itemRarity = "common"
+    end
+
+    -- Фон для имени с градиентом в зависимости от редкости
+    local nameBackground = Instance.new("Frame")
+    nameBackground.Size = UDim2.new(0, 180, 0, 40)
+    nameBackground.Position = UDim2.new(0.5, -90, 0, 5)
+    nameBackground.BorderSizePixel = 0
+    nameBackground.Parent = nameLabel
+
+    -- Цвета по редкости
+    local rarityColors = {
+        common = {Color3.fromRGB(60, 60, 60), Color3.fromRGB(40, 40, 40)},
+        uncommon = {Color3.fromRGB(60, 80, 60), Color3.fromRGB(40, 60, 40)},
+        rare = {Color3.fromRGB(80, 60, 60), Color3.fromRGB(60, 40, 40)},
+        epic = {Color3.fromRGB(80, 60, 120), Color3.fromRGB(60, 40, 100)},
+        legendary = {Color3.fromRGB(120, 100, 60), Color3.fromRGB(100, 80, 40)}
+    }
+
+    nameBackground.BackgroundColor3 = rarityColors[itemRarity][1]
+    nameBackground.BackgroundTransparency = 0.2
+
+    -- Скругленные углы для имени
+    local nameCorner = Instance.new("UICorner")
+    nameCorner.CornerRadius = UDim.new(0, 10)
+    nameCorner.Parent = nameBackground
+
+    -- Обводка для имени с цветом по типу предмета
+    local nameStroke = Instance.new("UIStroke")
+    nameStroke.Color = itemColor
+    nameStroke.Thickness = 2
+    nameStroke.Transparency = 0.2
+    nameStroke.Parent = nameBackground
+
+    -- Градиент для фона имени
+    local nameGradient = Instance.new("UIGradient")
+    nameGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, rarityColors[itemRarity][1]),
+        ColorSequenceKeypoint.new(1, rarityColors[itemRarity][2])
+    }
+    nameGradient.Rotation = 45
+    nameGradient.Parent = nameBackground
+
+    local nameText = Instance.new("TextLabel")
+    nameText.Size = UDim2.new(1, 0, 1, 0)
+    nameText.BackgroundTransparency = 1
+    nameText.TextColor3 = itemColor
+    nameText.TextStrokeTransparency = 0
+    nameText.TextStrokeColor3 = Color3.new(0, 0, 0)
+    nameText.Text = itemIcon .. " " .. item.Name .. " [" .. itemType:upper() .. "]"
+    nameText.Font = Enum.Font.GothamBold
+    nameText.TextSize = 14
+    nameText.TextXAlignment = Enum.TextXAlignment.Center
+    nameText.TextYAlignment = Enum.TextYAlignment.Center
+    nameText.Parent = nameBackground
+
+    -- Создаем красивое выделение предмета
     local highlight = Instance.new("BoxHandleAdornment")
     highlight.Name = "CXNT_ITEM_ESP"
     highlight.Adornee = item
+    highlight.Color3 = itemColor
+    highlight.Transparency = 0.2
+    highlight.Size = item.Size + Vector3.new(0.2, 0.2, 0.2)
     highlight.AlwaysOnTop = true
     highlight.ZIndex = 10
-    highlight.Size = item.Size + Vector3.new(0.1, 0.1, 0.1)
-    highlight.Transparency = 0.7
-
-    -- Определяем цвет в зависимости от типа предмета
-    local itemName = item.Name:lower()
-    if itemName:find("weapon") or itemName:find("gun") or itemName:find("sword") or itemName:find("knife") then
-        highlight.Color3 = Color3.new(1, 0, 0) -- Красный для оружия
-    elseif itemName:find("ammo") then
-        highlight.Color3 = Color3.new(1, 1, 0) -- Желтый для патронов
-    elseif itemName:find("heal") or itemName:find("med") or itemName:find("bandage") then
-        highlight.Color3 = Color3.new(0, 1, 0) -- Зеленый для медикаментов
-    elseif itemName:find("bond") then
-        highlight.Color3 = Color3.new(0, 0, 1) -- Синий для бондов
-    else
-        highlight.Color3 = Color3.new(1, 1, 1) -- Белый для остальных предметов
-    end
-
     highlight.Parent = game.CoreGui
 
-    -- Добавляем название предмета
-    local label = Instance.new("BillboardGui")
-    label.Name = "CXNT_ITEM_LABEL"
-    label.Size = UDim2.new(0, 100, 0, 20)
-    label.StudsOffset = Vector3.new(0, item.Size.Y + 0.5, 0)
-    label.AlwaysOnTop = true
-    label.Parent = item
+    -- Дополнительная обводка для лучшей видимости
+    local outline = Instance.new("SelectionBox")
+    outline.Name = "CXNT_ITEM_ESP_Outline"
+    outline.Adornee = item
+    outline.Color3 = Color3.fromRGB(255, 255, 255)
+    outline.LineThickness = 0.1
+    outline.Transparency = 0.1
+    outline.SurfaceColor3 = itemColor
+    outline.SurfaceTransparency = 0.8
+    outline.Parent = game.CoreGui
 
-    local text = Instance.new("TextLabel")
-    text.Size = UDim2.new(1, 0, 1, 0)
-    text.BackgroundTransparency = 1
-    text.TextColor3 = Color3.new(1,1, 1)
-    text.TextStrokeTransparency = 0
-    text.TextStrokeColor3 = Color3.new(0, 0, 0)
-    text.Text = item.Name
-    text.Font = Enum.Font.GothamBold
-    text.TextSize = 14
-    text.Parent = label
+    -- Создаем информационную панель с расстоянием
+    local infoPanel = Instance.new("Frame")
+    infoPanel.Size = UDim2.new(0, 120, 0, 20)
+    infoPanel.Position = UDim2.new(0.5, -60, 1, 5)
+    infoPanel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    infoPanel.BackgroundTransparency = 0.3
+    infoPanel.BorderSizePixel = 0
+    infoPanel.Parent = nameLabel
 
-    itemEspObjects[item] = {highlight = highlight, label = label}
+    local infoPanelCorner = Instance.new("UICorner")
+    infoPanelCorner.CornerRadius = UDim.new(0, 6)
+    infoPanelCorner.Parent = infoPanel
+
+    local distanceText = Instance.new("TextLabel")
+    distanceText.Size = UDim2.new(1, 0, 1, 0)
+    distanceText.BackgroundTransparency = 1
+    distanceText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    distanceText.TextStrokeTransparency = 0
+    distanceText.TextStrokeColor3 = Color3.new(0, 0, 0)
+    distanceText.Text = "0m"
+    distanceText.Font = Enum.Font.Gotham
+    distanceText.TextSize = 12
+    distanceText.TextXAlignment = Enum.TextXAlignment.Center
+    distanceText.TextYAlignment = Enum.TextYAlignment.Center
+    distanceText.Parent = infoPanel
+
+    -- Анимация мерцания для редких предметов
+    if itemRarity == "legendary" or itemRarity == "epic" then
+        spawn(function()
+            while nameText.Parent do
+                local glowTween = game:GetService("TweenService"):Create(
+                    nameStroke,
+                    TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+                    {Transparency = 0.05}
+                )
+                glowTween:Play()
+                wait(3)
+                if not nameText.Parent then break end
+                glowTween:Cancel()
+            end
+        end)
+
+        -- Добавляем частицы для легендарных предметов
+        if itemRarity == "legendary" then
+            local particle = Instance.new("ParticleEmitter")
+            particle.Rate = 20
+            particle.Speed = NumberRange.new(1, 3)
+            particle.Lifetime = NumberRange.new(1, 2)
+            particle.Size = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 0.2),
+                NumberSequenceKeypoint.new(0.5, 0.4),
+                NumberSequenceKeypoint.new(1, 0.2)
+            })
+            particle.Transparency = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 1),
+                NumberSequenceKeypoint.new(0.2, 0.6),
+                NumberSequenceKeypoint.new(0.8, 0.6),
+                NumberSequenceKeypoint.new(1, 1)
+            })
+            particle.Color = ColorSequence.new(itemColor)
+            particle.SpreadAngle = Vector2.new(360, 360)
+            particle.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+            particle.Parent = item
+        end
+    end
+
+    -- Анимация пульсации для обеих частей
+    spawn(function()
+        while highlight.Parent and outline.Parent do
+            local pulseTween1 = game:GetService("TweenService"):Create(
+                highlight,
+                TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+                {Transparency = 0.05}
+            )
+            local pulseTween2 = game:GetService("TweenService"):Create(
+                outline,
+                TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+                {Transparency = 0.05}
+            )
+            pulseTween1:Play()
+            pulseTween2:Play()
+            wait(4)
+            if not highlight.Parent or not outline.Parent then break end
+            pulseTween1:Cancel()
+            pulseTween2:Cancel()
+        end
+    end)
+
+    -- Обновление расстояния в реальном времени
+    spawn(function()
+        while distanceText.Parent do
+            local character = game.Players.LocalPlayer.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                local distance = (item.Position - character.HumanoidRootPart.Position).Magnitude
+                distanceText.Text = math.floor(distance) .. "m"
+                
+                -- Изменяем цвет текста в зависимости от расстояния
+                if distance < 10 then
+                    distanceText.TextColor3 = Color3.fromRGB(50, 255, 50) -- Зеленый - близко
+                elseif distance < 25 then
+                    distanceText.TextColor3 = Color3.fromRGB(255, 255, 50) -- Желтый - средне
+                else
+                    distanceText.TextColor3 = Color3.fromRGB(255, 100, 100) -- Красный - далеко
+                end
+            end
+            wait(0.5)
+        end
+    end)
+
+    itemEspObjects[item] = {
+        highlight = highlight, 
+        outline = outline,
+        label = nameLabel, 
+        distanceText = distanceText,
+        itemType = itemType,
+        itemRarity = itemRarity
+    }
 end
 
 local function toggleItemEsp()
@@ -1045,6 +1401,7 @@ local function toggleItemEsp()
     for item, objects in pairs(itemEspObjects) do
         if not item or not item.Parent then
             if objects.highlight then objects.highlight:Destroy() end
+            if objects.outline then objects.outline:Destroy() end
             if objects.label then objects.label:Destroy() end
             itemEspObjects[item] = nil
         end
@@ -1055,14 +1412,15 @@ local function toggleItemEsp()
         workspace.DescendantRemoving:Connect(function(item)
             if itemEspObjects[item] then
                 if itemEspObjects[item].highlight then itemEspObjects[item].highlight:Destroy() end
+                if itemEspObjects[item].outline then itemEspObjects[item].outline:Destroy() end
                 if itemEspObjects[item].label then itemEspObjects[item].label:Destroy() end
                 itemEspObjects[item] = nil
             end
         end)
 
-        -- Ищем все интерактивные предметы в игре
+        -- Ищем все интерактивные предметы в игре с расширенным списком
         for _, item in pairs(workspace:GetDescendants()) do
-            -- Проверяем является ли предмет интерактивным (можно настроить под конкретную игру)
+            -- Проверяем является ли предмет интерактивным (расширенная проверка)
             if item:IsA("BasePart") and 
                (item.Name:lower():find("item") or 
                 item.Name:lower():find("pickup") or 
@@ -1078,28 +1436,102 @@ local function toggleItemEsp()
                 item.Name:lower():find("bandage") or
                 item.Name:lower():find("bond") or
                 item.Name:lower():find("money") or
+                item.Name:lower():find("cash") or
+                item.Name:lower():find("coin") or
+                item.Name:lower():find("gem") or
                 item.Name:lower():find("loot") or
-                item.Name:lower():find("collect")) then
+                item.Name:lower():find("collect") or
+                item.Name:lower():find("resource") or
+                item.Name:lower():find("armor") or
+                item.Name:lower():find("vest") or
+                item.Name:lower():find("drop") or
+                item.Name:lower():find("supply")) then
                 createItemEsp(item)
             end
         end
 
-        -- Следим за новыми предметами
+        -- Следим за новыми предметами с улучшенной проверкой
         workspace.DescendantAdded:Connect(function(item)
             if itemEspEnabled and item:IsA("BasePart") and
                (item.Name:lower():find("item") or 
                 item.Name:lower():find("pickup") or 
                 item.Name:lower():find("tool") or
                 item.Name:lower():find("weapon") or
+                item.Name:lower():find("gun") or
+                item.Name:lower():find("sword") or
+                item.Name:lower():find("knife") or
                 item.Name:lower():find("ammo") or
-                item.Name:lower():find("heal")) then
+                item.Name:lower():find("mag") or
+                item.Name:lower():find("heal") or
+                item.Name:lower():find("med") or
+                item.Name:lower():find("bandage") or
+                item.Name:lower():find("bond") or
+                item.Name:lower():find("money") or
+                item.Name:lower():find("cash") or
+                item.Name:lower():find("coin") or
+                item.Name:lower():find("gem") or
+                item.Name:lower():find("loot") or
+                item.Name:lower():find("collect") or
+                item.Name:lower():find("resource") or
+                item.Name:lower():find("armor") or
+                item.Name:lower():find("vest") or
+                item.Name:lower():find("drop") or
+                item.Name:lower():find("supply")) then
                 createItemEsp(item)
+            end
+        end)
+
+        -- Обновление цветов ESP предметов (как у игроков)
+        spawn(function()
+            while itemEspEnabled do
+                colorPhase = (colorPhase + colorSpeed * 1.5) % 1
+                local hue = colorPhase * 360
+                
+                local function HSVtoRGB(h, s, v)
+                    local r, g, b
+                    local i = math.floor(h / 60) % 6
+                    local f = h / 60 - i
+                    local p = v * (1 - s)
+                    local q = v * (1 - f * s)
+                    local t = v * (1 - (1 - f) * s)
+                    
+                    if i == 0 then
+                        r, g, b = v, t, p
+                    elseif i == 1 then
+                        r, g, b = q, v, p
+                    elseif i == 2 then
+                        r, g, b = p, v, t
+                    elseif i == 3 then
+                        r, g, b = p, q, v
+                    elseif i == 4 then
+                        r, g, b = t, p, v
+                    elseif i == 5 then
+                        r, g, b = v, p, q
+                    end
+                    
+                    return Color3.new(r, g, b)
+                end
+
+                for item, objects in pairs(itemEspObjects) do
+                    if objects.highlight and objects.highlight.Parent then
+                        -- Только легендарные предметы получают радужный эффект
+                        if objects.itemRarity == "legendary" then
+                            local rainbowColor = HSVtoRGB(hue, 0.8, 1)
+                            objects.highlight.Color3 = rainbowColor
+                            if objects.outline then
+                                objects.outline.Color3 = rainbowColor
+                            end
+                        end
+                    end
+                end
+                wait(0.1)
             end
         end)
     else
         -- Удаляем ESP с предметов
         for _, objects in pairs(itemEspObjects) do
             if objects.highlight then objects.highlight:Destroy() end
+            if objects.outline then objects.outline:Destroy() end
             if objects.label then objects.label:Destroy() end
         end
         itemEspObjects = {}
@@ -1109,21 +1541,58 @@ local function toggleItemEsp()
 end
 
 local lastUpdate = 0
-local updateInterval = 0.1 -- Update every 0.1 seconds instead of every frame
+local updateInterval = 0.05 -- Faster updates for smoother animation
 
 local function updateEspColor()
     local currentTime = tick()
     if currentTime - lastUpdate < updateInterval then return end
 
     lastUpdate = currentTime
-    colorPhase = (colorPhase + colorSpeed) % 1
-    local brightness = 0.5 + 0.5 * math.sin(colorPhase * math.pi * 2)
-    espColor = Color3.new(brightness, brightness, brightness)
+    colorPhase = (colorPhase + colorSpeed * 2) % 1
+    
+    -- Создаем радужный эффект
+    local hue = colorPhase * 360
+    local function HSVtoRGB(h, s, v)
+        local r, g, b
+        local i = math.floor(h / 60) % 6
+        local f = h / 60 - i
+        local p = v * (1 - s)
+        local q = v * (1 - f * s)
+        local t = v * (1 - (1 - f) * s)
+        
+        if i == 0 then
+            r, g, b = v, t, p
+        elseif i == 1 then
+            r, g, b = q, v, p
+        elseif i == 2 then
+            r, g, b = p, v, t
+        elseif i == 3 then
+            r, g, b = p, q, v
+        elseif i == 4 then
+            r, g, b = t, p, v
+        elseif i == 5 then
+            r, g, b = v, p, q
+        end
+        
+        return Color3.new(r, g, b)
+    end
+    
+    espColor = HSVtoRGB(hue, 0.8, 1)
 
-    for player, parts in pairs(espObjects) do
+    for target, parts in pairs(espObjects) do
+        local isPlayer = game.Players:GetPlayerFromCharacter(target)
         for _, part in ipairs(parts) do
             if part and part.Parent then
-                part.Color = espColor
+                if part:IsA("SelectionBox") then
+                    part.Color3 = isPlayer and espColor or Color3.fromRGB(255, 50, 50)
+                    part.SurfaceColor3 = part.Color3
+                elseif part.Name == "CXNT_NameLabel" then
+                    -- Обновляем цвет текста имени
+                    local nameText = part:FindFirstChild("Frame") and part.Frame:FindFirstChild("TextLabel")
+                    if nameText then
+                        nameText.TextColor3 = isPlayer and espColor or Color3.fromRGB(255, 100, 100)
+                    end
+                end
             end
         end
     end
@@ -1136,64 +1605,145 @@ local function createEsp(target, isPlayer)
         if not character then return end
         local parts = {}
 
-        -- Red for mobs/NPCs, white for players
-        local espColorToUse = isPlayer and Color3.new(1, 1, 1) or Color3.new(1, 0, 0)
-
         -- Remove old ESP if exists
         if espObjects[target] then
             removeEsp(target)
         end
 
-        -- Create name label at the top
+        -- Создаем красивый name label с рамкой
         local nameLabel = Instance.new("BillboardGui")
-    nameLabel.Name = "CXNT_NameLabel"
-    nameLabel.Size = UDim2.new(0, 200, 0, 50)
-    nameLabel.StudsOffset = Vector3.new(0, 3, 0)
-    nameLabel.AlwaysOnTop = true
-    nameLabel.Parent = character:WaitForChild("Head")
+        nameLabel.Name = "CXNT_NameLabel"
+        nameLabel.Size = UDim2.new(0, 200, 0, 60)
+        nameLabel.StudsOffset = Vector3.new(0, 4, 0)
+        nameLabel.AlwaysOnTop = true
+        nameLabel.Parent = character:WaitForChild("Head")
 
-    local nameText = Instance.new("TextLabel")
-    nameText.Size = UDim2.new(1, 0, 1, 0)
-    nameText.BackgroundTransparency = 1
-    nameText.TextColor3 = Color3.new(1, 1, 1)
-    nameText.TextStrokeTransparency = 0
-    nameText.TextStrokeColor3 = Color3.new(0, 0, 0)
-    nameText.Text = target.Name
-    nameText.Font = Enum.Font.GothamBold
-    nameText.TextSize = 14
-    nameText.Parent = nameLabel
+        -- Фон для имени
+        local nameBackground = Instance.new("Frame")
+        nameBackground.Size = UDim2.new(0, 180, 0, 35)
+        nameBackground.Position = UDim2.new(0.5, -90, 0, 5)
+        nameBackground.BackgroundColor3 = isPlayer and Color3.fromRGB(30, 30, 30) or Color3.fromRGB(50, 20, 20)
+        nameBackground.BackgroundTransparency = 0.3
+        nameBackground.BorderSizePixel = 0
+        nameBackground.Parent = nameLabel
 
-    table.insert(parts, nameLabel)
+        -- Скругленные углы для имени
+        local nameCorner = Instance.new("UICorner")
+        nameCorner.CornerRadius = UDim.new(0, 8)
+        nameCorner.Parent = nameBackground
 
-    local function addHighlight(part)
-        if part:IsA("BasePart") then
-            local highlight = Instance.new("BoxHandleAdornment")
-            highlight.Name = "CXNT_ESP"
-            highlight.Adornee = part
-            highlight.AlwaysOnTop = true
-            highlight.ZIndex = 10
-            highlight.Size = part.Size + Vector3.new(0.1, 0.1, 0.1)
-            highlight.Transparency = 0.7
-            highlight.Color3 = espColor
-            highlight.Parent = game.CoreGui
+        -- Обводка для имени
+        local nameStroke = Instance.new("UIStroke")
+        nameStroke.Color = isPlayer and Color3.fromRGB(0, 255, 255) or Color3.fromRGB(255, 50, 50)
+        nameStroke.Thickness = 2
+        nameStroke.Transparency = 0.3
+        nameStroke.Parent = nameBackground
 
-            table.insert(parts, highlight)
+        -- Градиент для фона имени
+        local nameGradient = Instance.new("UIGradient")
+        nameGradient.Color = isPlayer and ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 40, 60)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 40))
+        } or ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 30, 30)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 20, 20))
+        }
+        nameGradient.Rotation = 45
+        nameGradient.Parent = nameBackground
+
+        local nameText = Instance.new("TextLabel")
+        nameText.Size = UDim2.new(1, 0, 1, 0)
+        nameText.BackgroundTransparency = 1
+        nameText.TextColor3 = isPlayer and Color3.fromRGB(100, 255, 255) or Color3.fromRGB(255, 100, 100)
+        nameText.TextStrokeTransparency = 0
+        nameText.TextStrokeColor3 = Color3.new(0, 0, 0)
+        nameText.Text = isPlayer and "👤 " .. target.Name or "🤖 " .. target.Name
+        nameText.Font = Enum.Font.GothamBold
+        nameText.TextSize = 16
+        nameText.TextXAlignment = Enum.TextXAlignment.Center
+        nameText.TextYAlignment = Enum.TextYAlignment.Center
+        nameText.Parent = nameBackground
+
+        -- Анимация мерцания для имени
+        spawn(function()
+            while nameText.Parent do
+                local glowTween = game:GetService("TweenService"):Create(
+                    nameStroke,
+                    TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+                    {Transparency = 0.1}
+                )
+                glowTween:Play()
+                wait(2)
+                if not nameText.Parent then break end
+                glowTween:Cancel()
+            end
+        end)
+
+        table.insert(parts, nameLabel)
+
+        local function addHighlight(part)
+            if part:IsA("BasePart") then
+                -- Используем BoxHandleAdornment для лучшей видимости через стены
+                local highlight = Instance.new("BoxHandleAdornment")
+                highlight.Name = "CXNT_ESP"
+                highlight.Adornee = part
+                highlight.Color3 = isPlayer and Color3.fromRGB(0, 255, 255) or Color3.fromRGB(255, 50, 50)
+                highlight.Transparency = 0.3
+                highlight.Size = part.Size + Vector3.new(0.05, 0.05, 0.05)
+                highlight.AlwaysOnTop = true
+                highlight.ZIndex = 10
+                highlight.Parent = game.CoreGui
+
+                -- Дополнительная обводка для лучшей видимости
+                local outline = Instance.new("SelectionBox")
+                outline.Name = "CXNT_ESP_Outline"
+                outline.Adornee = part
+                outline.Color3 = isPlayer and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(255, 255, 255)
+                outline.LineThickness = 0.15
+                outline.Transparency = 0.1
+                outline.SurfaceTransparency = 1
+                outline.Parent = game.CoreGui
+
+                -- Анимация пульсации для обеих частей
+                spawn(function()
+                    while highlight.Parent and outline.Parent do
+                        local pulseTween1 = game:GetService("TweenService"):Create(
+                            highlight,
+                            TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+                            {Transparency = 0.1}
+                        )
+                        local pulseTween2 = game:GetService("TweenService"):Create(
+                            outline,
+                            TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+                            {Transparency = 0.05}
+                        )
+                        pulseTween1:Play()
+                        pulseTween2:Play()
+                        wait(3)
+                        if not highlight.Parent or not outline.Parent then break end
+                        pulseTween1:Cancel()
+                        pulseTween2:Cancel()
+                    end
+                end)
+
+                table.insert(parts, highlight)
+                table.insert(parts, outline)
+            end
         end
-    end
 
-    for _, part in ipairs(character:GetDescendants()) do
-        if part:IsA("BasePart") then
-            addHighlight(part)
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                addHighlight(part)
+            end
         end
-    end
 
-    character.DescendantAdded:Connect(function(part)
-        if part:IsA("BasePart") then
-            addHighlight(part)
-        end
-    end)
+        character.DescendantAdded:Connect(function(part)
+            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                addHighlight(part)
+            end
+        end)
 
-    espObjects[target] = parts
+        espObjects[target] = parts
     end
 
     if isPlayer then
@@ -1340,6 +1890,349 @@ local function toggleSpin()
     end
 end
 
+-- Voice Chat System
+local voiceChatEnabled = false
+local voiceChatUsers = {}
+local currentLobby = nil
+local voiceChatConnections = {}
+local microphoneActive = false
+local voiceVolume = 0.5
+
+-- Определение лобби игрока
+local function getCurrentLobby()
+    local lobbyId = game.JobId or game.PlaceId
+    return lobbyId
+end
+
+-- Создание голосового чата
+local function createVoiceChat()
+    -- Создаем основное GUI для голосового чата
+    local voiceGui = Instance.new("ScreenGui")
+    voiceGui.Name = "CXNT_VoiceChat"
+    voiceGui.Parent = game:GetService("CoreGui")
+
+    -- Главная панель голосового чата
+    local voiceFrame = Instance.new("Frame")
+    voiceFrame.Size = UDim2.new(0, 300, 0, 200)
+    voiceFrame.Position = UDim2.new(1, -320, 0, 100)
+    voiceFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    voiceFrame.BorderSizePixel = 0
+    voiceFrame.Parent = voiceGui
+
+    local voiceCorner = Instance.new("UICorner")
+    voiceCorner.CornerRadius = UDim.new(0, 12)
+    voiceCorner.Parent = voiceFrame
+
+    local voiceStroke = Instance.new("UIStroke")
+    voiceStroke.Color = Color3.fromRGB(255, 0, 0)
+    voiceStroke.Thickness = 2
+    voiceStroke.Transparency = 0.3
+    voiceStroke.Parent = voiceFrame
+
+    -- Заголовок
+    local voiceTitle = Instance.new("TextLabel")
+    voiceTitle.Text = "🎙️ VOICE CHAT"
+    voiceTitle.Size = UDim2.new(1, 0, 0, 30)
+    voiceTitle.Position = UDim2.new(0, 0, 0, 0)
+    voiceTitle.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    voiceTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    voiceTitle.Font = Enum.Font.GothamBold
+    voiceTitle.TextSize = 16
+    voiceTitle.Parent = voiceFrame
+
+    local titleCorner = Instance.new("UICorner")
+    titleCorner.CornerRadius = UDim.new(0, 8)
+    titleCorner.Parent = voiceTitle
+
+    -- Список пользователей
+    local usersList = Instance.new("ScrollingFrame")
+    usersList.Size = UDim2.new(1, -10, 0, 120)
+    usersList.Position = UDim2.new(0, 5, 0, 35)
+    usersList.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    usersList.BorderSizePixel = 0
+    usersList.ScrollBarThickness = 6
+    usersList.Parent = voiceFrame
+
+    local usersCorner = Instance.new("UICorner")
+    usersCorner.CornerRadius = UDim.new(0, 8)
+    usersCorner.Parent = usersList
+
+    local usersLayout = Instance.new("UIListLayout")
+    usersLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    usersLayout.Padding = UDim.new(0, 2)
+    usersLayout.Parent = usersList
+
+    -- Кнопка микрофона
+    local micButton = Instance.new("TextButton")
+    micButton.Size = UDim2.new(0.48, 0, 0, 25)
+    micButton.Position = UDim2.new(0, 5, 1, -30)
+    micButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    micButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    micButton.Font = Enum.Font.GothamSemibold
+    micButton.TextSize = 12
+    micButton.Text = "🎤 MIC: OFF"
+    micButton.BorderSizePixel = 0
+    micButton.Parent = voiceFrame
+
+    local micCorner = Instance.new("UICorner")
+    micCorner.CornerRadius = UDim.new(0, 6)
+    micCorner.Parent = micButton
+
+    -- Слайдер громкости
+    local volumeLabel = Instance.new("TextLabel")
+    volumeLabel.Size = UDim2.new(0.48, 0, 0, 25)
+    volumeLabel.Position = UDim2.new(0.52, 0, 1, -30)
+    volumeLabel.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    volumeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    volumeLabel.Font = Enum.Font.GothamSemibold
+    volumeLabel.TextSize = 12
+    volumeLabel.Text = "🔊 VOL: 50%"
+    volumeLabel.BorderSizePixel = 0
+    volumeLabel.Parent = voiceFrame
+
+    local volumeCorner = Instance.new("UICorner")
+    volumeCorner.CornerRadius = UDim.new(0, 6)
+    volumeCorner.Parent = volumeLabel
+
+    return voiceGui, usersList, micButton, volumeLabel
+end
+
+-- Обновление списка пользователей в голосовом чате
+local function updateVoiceChatUsers(usersList)
+    -- Очищаем старый список
+    for _, child in pairs(usersList:GetChildren()) do
+        if child:IsA("Frame") then
+            child:Destroy()
+        end
+    end
+
+    -- Добавляем текущих пользователей
+    local yOffset = 0
+    for playerId, userData in pairs(voiceChatUsers) do
+        local userFrame = Instance.new("Frame")
+        userFrame.Size = UDim2.new(1, -5, 0, 25)
+        userFrame.Position = UDim2.new(0, 0, 0, yOffset)
+        userFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        userFrame.BorderSizePixel = 0
+        userFrame.Parent = usersList
+
+        local userCorner = Instance.new("UICorner")
+        userCorner.CornerRadius = UDim.new(0, 6)
+        userCorner.Parent = userFrame
+
+        local userLabel = Instance.new("TextLabel")
+        userLabel.Size = UDim2.new(0.7, 0, 1, 0)
+        userLabel.Position = UDim2.new(0, 5, 0, 0)
+        userLabel.BackgroundTransparency = 1
+        userLabel.TextColor3 = userData.speaking and Color3.fromRGB(100, 255, 100) or Color3.fromRGB(255, 255, 255)
+        userLabel.Font = Enum.Font.Gotham
+        userLabel.TextSize = 12
+        userLabel.Text = userData.name
+        userLabel.TextXAlignment = Enum.TextXAlignment.Left
+        userLabel.Parent = userFrame
+
+        local statusIcon = Instance.new("TextLabel")
+        statusIcon.Size = UDim2.new(0.3, 0, 1, 0)
+        statusIcon.Position = UDim2.new(0.7, 0, 0, 0)
+        statusIcon.BackgroundTransparency = 1
+        statusIcon.TextColor3 = userData.micActive and Color3.fromRGB(100, 255, 100) or Color3.fromRGB(255, 100, 100)
+        statusIcon.Font = Enum.Font.Gotham
+        statusIcon.TextSize = 12
+        statusIcon.Text = userData.micActive and "🎤" or "🔇"
+        statusIcon.TextXAlignment = Enum.TextXAlignment.Center
+        statusIcon.Parent = userFrame
+
+        yOffset = yOffset + 27
+    end
+
+    usersList.CanvasSize = UDim2.new(0, 0, 0, yOffset)
+end
+
+-- Симуляция передачи голоса
+local function simulateVoiceTransmission(targetPlayerId, audioData)
+    -- Эмуляция отправки аудио данных
+    local success = math.random() > 0.1 -- 90% успешность передачи
+    
+    if success and voiceChatUsers[targetPlayerId] then
+        -- Воспроизводим звук у получателя
+        local sound = Instance.new("Sound")
+        sound.SoundId = "rbxassetid://131961136" -- Звук микрофона
+        sound.Volume = voiceVolume * 0.3
+        sound.PlaybackSpeed = 0.8 + math.random() * 0.4
+        sound.Parent = workspace
+        sound:Play()
+        
+        game:GetService("Debris"):AddItem(sound, 2)
+        
+        -- Обновляем статус говорения
+        voiceChatUsers[targetPlayerId].speaking = true
+        spawn(function()
+            wait(0.5)
+            if voiceChatUsers[targetPlayerId] then
+                voiceChatUsers[targetPlayerId].speaking = false
+            end
+        end)
+    end
+end
+
+-- Обработка голосового ввода
+local function handleVoiceInput()
+    if not microphoneActive then return end
+    
+    -- Симуляция записи голоса
+    local audioData = {
+        timestamp = tick(),
+        playerId = player.UserId,
+        lobbyId = currentLobby
+    }
+    
+    -- Отправляем голос всем пользователям в лобби
+    for playerId, userData in pairs(voiceChatUsers) do
+        if playerId ~= player.UserId and userData.lobbyId == currentLobby then
+            simulateVoiceTransmission(playerId, audioData)
+        end
+    end
+    
+    -- Визуальная индикация говорения
+    if voiceChatUsers[player.UserId] then
+        voiceChatUsers[player.UserId].speaking = true
+        spawn(function()
+            wait(0.3)
+            if voiceChatUsers[player.UserId] then
+                voiceChatUsers[player.UserId].speaking = false
+            end
+        end)
+    end
+end
+
+-- Подключение к голосовому чату
+local function connectToVoiceChat()
+    currentLobby = getCurrentLobby()
+    
+    -- Добавляем себя в список пользователей
+    voiceChatUsers[player.UserId] = {
+        name = player.Name,
+        micActive = false,
+        speaking = false,
+        lobbyId = currentLobby
+    }
+    
+    -- Добавляем других игроков из того же лобби
+    for _, otherPlayer in pairs(game.Players:GetPlayers()) do
+        if otherPlayer ~= player then
+            voiceChatUsers[otherPlayer.UserId] = {
+                name = otherPlayer.Name,
+                micActive = false,
+                speaking = false,
+                lobbyId = currentLobby
+            }
+        end
+    end
+end
+
+-- Отключение от голосового чата
+local function disconnectFromVoiceChat()
+    voiceChatUsers = {}
+    microphoneActive = false
+    
+    -- Удаляем GUI
+    local voiceGui = game:GetService("CoreGui"):FindFirstChild("CXNT_VoiceChat")
+    if voiceGui then
+        voiceGui:Destroy()
+    end
+    
+    -- Отключаем все соединения
+    for _, connection in pairs(voiceChatConnections) do
+        connection:Disconnect()
+    end
+    voiceChatConnections = {}
+end
+
+-- Функция переключения голосового чата
+local function toggleVoiceChat()
+    voiceChatEnabled = not voiceChatEnabled
+    voiceChatButton.Text = "VOICE CHAT: " .. (voiceChatEnabled and "ON" or "OFF")
+    
+    if voiceChatEnabled then
+        -- Создаем интерфейс голосового чата
+        local voiceGui, usersList, micButton, volumeLabel = createVoiceChat()
+        
+        -- Подключаемся к голосовому чату
+        connectToVoiceChat()
+        
+        -- Обновляем список пользователей
+        updateVoiceChatUsers(usersList)
+        
+        -- Обработчик кнопки микрофона
+        micButton.MouseButton1Click:Connect(function()
+            microphoneActive = not microphoneActive
+            micButton.Text = "🎤 MIC: " .. (microphoneActive and "ON" or "OFF")
+            micButton.BackgroundColor3 = microphoneActive and Color3.fromRGB(100, 255, 100) or Color3.fromRGB(40, 40, 40)
+            
+            if voiceChatUsers[player.UserId] then
+                voiceChatUsers[player.UserId].micActive = microphoneActive
+            end
+        end)
+        
+        -- Обработчик изменения громкости
+        volumeLabel.MouseButton1Click:Connect(function()
+            voiceVolume = (voiceVolume + 0.25) % 1.25
+            if voiceVolume == 0 then voiceVolume = 0.25 end
+            volumeLabel.Text = "🔊 VOL: " .. math.floor(voiceVolume * 100) .. "%"
+        end)
+        
+        -- Обработчик голосового ввода (по клавише V)
+        local inputConnection = game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+            if not gameProcessed and input.KeyCode == Enum.KeyCode.V and microphoneActive then
+                handleVoiceInput()
+            end
+        end)
+        table.insert(voiceChatConnections, inputConnection)
+        
+        -- Периодическое обновление списка пользователей
+        local updateConnection = game:GetService("RunService").Heartbeat:Connect(function()
+            if voiceChatEnabled then
+                updateVoiceChatUsers(usersList)
+                
+                -- Проверяем новых игроков в лобби
+                for _, newPlayer in pairs(game.Players:GetPlayers()) do
+                    if not voiceChatUsers[newPlayer.UserId] and newPlayer ~= player then
+                        voiceChatUsers[newPlayer.UserId] = {
+                            name = newPlayer.Name,
+                            micActive = false,
+                            speaking = false,
+                            lobbyId = currentLobby
+                        }
+                    end
+                end
+            end
+        end)
+        table.insert(voiceChatConnections, updateConnection)
+        
+        -- Уведомление о подключении
+        local notification = Instance.new("TextLabel")
+        notification.Text = "🎙️ Voice Chat подключен! Нажмите V для говорения"
+        notification.Size = UDim2.new(0, 350, 0, 50)
+        notification.Position = UDim2.new(0.5, -175, 0, 50)
+        notification.BackgroundColor3 = Color3.fromRGB(100, 255, 100)
+        notification.TextColor3 = Color3.fromRGB(0, 0, 0)
+        notification.Font = Enum.Font.GothamBold
+        notification.TextSize = 14
+        notification.BorderSizePixel = 0
+        notification.TextWrapped = true
+        notification.Parent = game:GetService("CoreGui")
+        
+        local notifCorner = Instance.new("UICorner")
+        notifCorner.CornerRadius = UDim.new(0, 8)
+        notifCorner.Parent = notification
+        
+        game:GetService("Debris"):AddItem(notification, 3)
+        
+    else
+        disconnectFromVoiceChat()
+    end
+end
+
 -- Основные функции
 local function updateSpeed(value)
     local currentTime = tick()
@@ -1360,7 +2253,37 @@ local function updateSpeed(value)
 end
 
 local function toggleMenu(visible)
-    frame.Visible = visible
+    if visible then
+        frame.Visible = true
+        frame.Size = UDim2.new(0, 0, 0, 0)
+        frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+
+        -- Анимация появления меню
+        TweenService:Create(frame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Size = UDim2.new(0, 600, 0, 600),
+            Position = UDim2.new(0.5, -300, 0.5, -300)
+        }):Play()
+
+        -- Анимация тени
+        shadow.BackgroundTransparency = 1
+        TweenService:Create(shadow, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
+            BackgroundTransparency = 0.7
+        }):Play()
+    else
+        -- Анимация исчезновения меню
+        TweenService:Create(frame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+            Size = UDim2.new(0, 0, 0, 0),
+            Position = UDim2.new(0.5, 0, 0.5, 0)
+        }):Play()
+
+        -- Анимация тени
+        TweenService:Create(shadow, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+            BackgroundTransparency = 1
+        }):Play()
+
+        wait(0.3)
+        frame.Visible = false
+    end
 end
 
 -- Оптимизация телепортации
@@ -1780,6 +2703,8 @@ local function initialize()
         local isEnabled = toggleItemEsp()
         itemEspButton.Text = "ITEM ESP: " .. (isEnabled and "ON" or "OFF")
     end)
+    
+    voiceChatButton.MouseButton1Click:Connect(toggleVoiceChat)
     spinButton.MouseButton1Click:Connect(toggleSpin)
     godModeButton.MouseButton1Click:Connect(toggleGodMode)
 
@@ -3543,22 +4468,22 @@ end)
                             -- Store our real position
                             local realPos = root.Position
                             local realCFrame = root.CFrame
-                            
+
                             -- Create lag effect for others
                             local randomOffset = Vector3.new(
                                 math.random(-5, 5),
                                 0,
                                 math.random(-5, 5)
                             )
-                            
+
                             -- Network manipulation to show different positions to others
                             game:GetService("NetworkClient"):SetOutgoingKBPSLimit(1)
                             root.Position = realPos + randomOffset
-                            
+
                             -- Immediately restore our view without affecting others
                             game:GetService("RunService").RenderStepped:Wait()
                             root.CFrame = realCFrame
-                            
+
                             -- Reset network limit
                             game:GetService("NetworkClient"):SetOutgoingKBPSLimit(math.huge)
                         end
@@ -3566,7 +4491,7 @@ end)
                     wait(0.1)
                 end
             end)
-            
+
             -- Smooth movement for us, laggy for others
             lagConnection = game:GetService("RunService").Heartbeat:Connect(function()
                 local character = player.Character
