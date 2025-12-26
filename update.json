@@ -1,6 +1,11 @@
 {
-  "latest_version_code": 5,
-  "apk_url": "https://raw.githubusercontent.com/anter1ty/ad87asdh/refs/heads/main/countmybandzup_v3.apk",
-  "changelog": "LOVE SOSA",
-  "start_url": "https://www.youtube.com/"
+  "versionCode": 120,
+  "versionName": "1.2.0",
+  "apkUrl": "https://github.com/<user>/<repo>/releases/download/v1.2.0/app-release.apk",
+  "changelog": "Fix UI, improve selection",
+  "forceUpdate": false,
+
+  "defaultSubscriptionUrl": "https://auth.quattro-cloud.ru/K-sQzhw4Q8SbQwTf",
+  "defaultSubscriptionName": "Quattro Cloud",
+  "defaultSubscriptionId": "quattro_cloud_default"
 }
